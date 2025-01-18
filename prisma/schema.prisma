@@ -1,0 +1,288 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LoginProviders {
+  local
+  google
+  facebook
+}
+
+enum Roles {
+  admin
+  student
+  people
+  partner
+}
+
+enum OrganizationTypes {
+  community
+  government
+  corporate
+  individual
+}
+
+enum NotificationTypes {
+  reminder
+  event_update
+  event_launching
+  custom
+}
+
+enum EducationLevels {
+  sma
+  smp
+  bachelor
+  higher
+}
+
+enum CommentReportStatus {
+  reviewed
+  dismissed
+  approved
+}
+
+enum ParticipationStatus {
+  reviewed
+  joined
+  completed
+  rejected
+}
+
+enum PartnerStatus {
+  pending
+  accepted
+  rejected
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  hashId        String         @unique @map("hash_id")
+  name          String         @db.VarChar(125)
+  email         String         @unique @db.VarChar(50)
+  phoneNumber   String?        @unique @map("phone_number") @db.VarChar(20)
+  password      String?        @db.VarChar
+  socialId      String?        @map("social_id") @db.VarChar
+  role          Roles          @default(people)
+  avatarUrl     String?        @map("avatar_url") @db.VarChar
+  loginProvider LoginProviders @default(local) @map("login_provider")
+  isSubscribed  Boolean        @default(false) @map("is_subcribed")
+  rememberToken String?        @map("remember_token") @db.VarChar
+  lastLoginAt   DateTime?      @map("last_login_at")
+  verifiedAt    DateTime?      @map("verified_at")
+  deletedAt     DateTime?      @map("deleted_at")
+  createdAt     DateTime?      @map("created_at")
+  updatedAt     DateTime       @default(now()) @map("updated_at")
+
+  profile        UserProfile?
+  education      UserEducation?
+  location       UserLocation?
+  partner        PartnerProfile?
+  events         Event[]
+  participations Participation[]
+  notifications  Notification[]
+  comments       Comment[]
+  reports        CommentReport[]
+  bookmarkEvents UserSavedEvent[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id     Int     @id @default(autoincrement())
+  hashId String  @unique @map("hash_id")
+  userId Int     @unique @map("user_id")
+  cv     String? @db.VarChar
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_profiles")
+}
+
+model UserEducation {
+  id               Int             @id @default(autoincrement())
+  hashId           String          @unique @map("hash_id")
+  userId           Int             @unique @map("user_id")
+  institutionName  String          @map("institution_name")
+  major            String?         @db.VarChar
+  educationLevel   EducationLevels @map("education_level")
+  studentCardUrl   String          @map("student_card_url")
+  identifierNumber String          @map("identifier_number") @db.VarChar(40)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_educations")
+}
+
+model PartnerProfile {
+  id                  Int               @id @default(autoincrement())
+  hashId              String            @unique @map("hash_id")
+  userId              Int               @unique @map("user_id")
+  organizationType    OrganizationTypes @map("organization_type")
+  organizationAddress String            @map("organization_address") @db.Text
+  instagram           String            @db.VarChar(50)
+  eventQuota          Int               @default(1) @map("event_quota")
+  status              PartnerStatus     @default(pending)
+  information         String?           @db.Text
+  createdAt           DateTime?         @map("created_at")
+  updatedAt           DateTime          @default(now()) @map("updated_at")
+
+  user               User               @relation(fields: [userId], references: [id])
+  responsiblePersons ResponsiblePerson?
+
+  @@map("partner_profiles")
+}
+
+model UserLocation {
+  id        Int      @id @default(autoincrement())
+  hashId    String   @unique @map("hash_id")
+  userId    Int      @unique @map("user_id")
+  location  String
+  latitude  Decimal  @db.Decimal(10, 8)
+  longitude Decimal  @db.Decimal(11, 8)
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_locations")
+}
+
+model ResponsiblePerson {
+  id               Int       @id @default(autoincrement())
+  hashId           String    @unique @map("hash_id")
+  partnerProfileId Int       @unique @map("partner_profile_id")
+  nik              String    @unique @db.VarChar(30)
+  fullName         String    @map("full_name") @db.VarChar(125)
+  phoneNumber      String    @map("phone_number") @db.VarChar(20)
+  position         String    @db.VarChar(50)
+  ktpUrl           String    @map("ktp_url") @db.VarChar
+  createdAt        DateTime? @map("created_at")
+  updatedAt        DateTime  @default(now()) @map("updated_at")
+
+  partnerProfile PartnerProfile @relation(fields: [partnerProfileId], references: [id])
+
+  @@map("responsible_persons")
+}
+
+model Event {
+  id                 Int       @id @default(autoincrement())
+  hashId             String    @unique @map("hash_id")
+  userId             Int       @unique @map("user_id")
+  title              String    @db.VarChar(100)
+  startAt            DateTime  @map("start_at")
+  endAt              DateTime? @map("end_at")
+  bannerUrl          String    @map("banner_url")
+  description        String    @db.Text
+  termsAndConditions String?   @map("terms_and_conditions") @db.Text
+  isRelease          Boolean   @default(false) @map("is_release")
+  contactPerson      String    @map("contact_person") @db.VarChar(15)
+  location           String
+  latitude           Decimal   @db.Decimal(10, 8)
+  longitude          Decimal   @db.Decimal(11, 8)
+  createdAt          DateTime? @map("created_at")
+  updatedAt          DateTime  @default(now()) @map("updated_at")
+
+  user            User             @relation(fields: [userId], references: [id])
+  categories      Category[]
+  userSavedEvents UserSavedEvent[]
+  comments        Comment[]
+  participations  Participation[]
+  
+  @@index([title])
+  @@map("events")
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  hashId      String    @unique @map("hash_id")
+  name        String    @unique @db.VarChar(40)
+  description String?   @db.Text
+  createdAt   DateTime? @map("created_at")
+  updatedAt   DateTime  @default(now()) @map("updated_at")
+
+  events Event[]
+
+  @@map("categories")
+}
+
+model UserSavedEvent {
+  id        Int       @id @default(autoincrement())
+  hashId    String    @unique @map("hash_id")
+  userId    Int       @map("user_id")
+  eventId   Int       @map("event_id")
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime  @default(now()) @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("user_saved_events")
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  hashId    String    @unique @map("hash_id")
+  userId    Int       @map("user_id")
+  eventId   Int       @map("event_id")
+  content   String    @db.Text
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime  @default(now()) @map("updated_at")
+
+  user    User            @relation(fields: [userId], references: [id])
+  event   Event           @relation(fields: [eventId], references: [id])
+  reports CommentReport[]
+
+  @@map("comments")
+}
+
+model CommentReport {
+  id         Int                 @id @default(autoincrement())
+  hashId     String              @unique @map("hash_id")
+  commentId  Int                 @map("comment_id")
+  reportedBy Int                 @map("reported_by")
+  reason     String              @db.Text
+  status     CommentReportStatus @default(reviewed)
+  reviewedAt DateTime?           @map("reviewed_at")
+  createdAt  DateTime?           @map("created_at")
+  updatedAt  DateTime            @default(now()) @map("updated_at")
+
+  comment        Comment @relation(fields: [commentId], references: [id])
+  reportedByUser User    @relation(fields: [reportedBy], references: [id])
+
+  @@map("comment_reports")
+}
+
+model Participation {
+  id                  Int                 @id @default(autoincrement())
+  hashId              String              @unique @map("hash_id")
+  userId              Int                 @map("user_id")
+  eventId             Int                 @map("event_id")
+  participationStatus ParticipationStatus @default(reviewed) @map("participation_status")
+  completedAt         DateTime?           @map("completed_at")
+  createdAt           DateTime?           @map("created_at")
+  updatedAt           DateTime            @default(now()) @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("participations")
+}
+
+model Notification {
+  id        Int               @id @default(autoincrement())
+  hashId    String            @unique @map("hash_id")
+  userId    Int               @map("user_id")
+  content   String            @db.Text
+  type      NotificationTypes
+  url       String?           @db.VarChar
+  createdAt DateTime?         @map("created_at")
+  updatedAt DateTime          @default(now()) @map("updated_at")
+  user      User              @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}

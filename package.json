@@ -1,0 +1,26 @@
+{
+  "name": "volunteerin",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "start:dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "darihatimencarisolusi",
+  "license": "MIT",
+  "description": "platform to connect volunteers with communities",
+  "_moduleAliases": {},
+  "dependencies": {
+    "@prisma/client": "^6.2.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "module-alias": "^2.2.3"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.4.0",
+    "prisma": "^6.2.1"
+  }
+}
