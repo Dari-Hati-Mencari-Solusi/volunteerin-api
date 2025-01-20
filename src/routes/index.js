@@ -1,6 +1,3 @@
-
-const initRoutes = (app) => { 
-
-};
+const initRoutes = () => {};
 
 export default initRoutes;
