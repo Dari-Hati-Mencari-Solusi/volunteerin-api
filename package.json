@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "start:dev": "nodemon server.js",
@@ -21,9 +24,11 @@
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "helmet": "^8.0.0",
     "module-alias": "^2.2.3",
     "morgan": "^1.10.0"
   },
