@@ -1,3 +1,5 @@
-const initRoutes = () => {};
+import authRoute from './auth.route.js';
 
-export default initRoutes;
+export default (app) => {
+  app.use('/api/auth', authRoute);
+};
