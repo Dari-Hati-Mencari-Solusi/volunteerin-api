@@ -62,7 +62,7 @@ enum PartnerStatus {
 
 model User {
   id            Int            @id @default(autoincrement())
-  hashId        String         @unique @map("hash_id")
+  hashId        String?         @unique @map("hash_id")
   name          String         @db.VarChar(125)
   email         String         @unique @db.VarChar(50)
   phoneNumber   String?        @unique @map("phone_number") @db.VarChar(20)
@@ -95,7 +95,7 @@ model User {
 
 model UserProfile {
   id     Int     @id @default(autoincrement())
-  hashId String  @unique @map("hash_id")
+  hashId String?  @unique @map("hash_id")
   userId Int     @unique @map("user_id")
   cv     String? @db.VarChar
 
@@ -106,7 +106,7 @@ model UserProfile {
 
 model UserEducation {
   id               Int             @id @default(autoincrement())
-  hashId           String          @unique @map("hash_id")
+  hashId           String?          @unique @map("hash_id")
   userId           Int             @unique @map("user_id")
   institutionName  String          @map("institution_name")
   major            String?         @db.VarChar
@@ -121,7 +121,7 @@ model UserEducation {
 
 model PartnerProfile {
   id                  Int               @id @default(autoincrement())
-  hashId              String            @unique @map("hash_id")
+  hashId              String?            @unique @map("hash_id")
   userId              Int               @unique @map("user_id")
   organizationType    OrganizationTypes @map("organization_type")
   organizationAddress String            @map("organization_address") @db.Text
@@ -140,7 +140,7 @@ model PartnerProfile {
 
 model UserLocation {
   id        Int      @id @default(autoincrement())
-  hashId    String   @unique @map("hash_id")
+  hashId    String?   @unique @map("hash_id")
   userId    Int      @unique @map("user_id")
   location  String
   latitude  Decimal  @db.Decimal(10, 8)
@@ -154,7 +154,7 @@ model UserLocation {
 
 model ResponsiblePerson {
   id               Int       @id @default(autoincrement())
-  hashId           String    @unique @map("hash_id")
+  hashId           String?    @unique @map("hash_id")
   partnerProfileId Int       @unique @map("partner_profile_id")
   nik              String    @unique @db.VarChar(30)
   fullName         String    @map("full_name") @db.VarChar(125)
@@ -171,7 +171,7 @@ model ResponsiblePerson {
 
 model Event {
   id                 Int       @id @default(autoincrement())
-  hashId             String    @unique @map("hash_id")
+  hashId             String?    @unique @map("hash_id")
   userId             Int       @unique @map("user_id")
   title              String    @db.VarChar(100)
   startAt            DateTime  @map("start_at")
@@ -199,7 +199,7 @@ model Event {
 
 model Category {
   id          Int       @id @default(autoincrement())
-  hashId      String    @unique @map("hash_id")
+  hashId      String?    @unique @map("hash_id")
   name        String    @unique @db.VarChar(40)
   description String?   @db.Text
   createdAt   DateTime? @map("created_at")
@@ -212,7 +212,7 @@ model Category {
 
 model UserSavedEvent {
   id        Int       @id @default(autoincrement())
-  hashId    String    @unique @map("hash_id")
+  hashId    String?    @unique @map("hash_id")
   userId    Int       @map("user_id")
   eventId   Int       @map("event_id")
   createdAt DateTime? @map("created_at")
@@ -226,7 +226,7 @@ model UserSavedEvent {
 
 model Comment {
   id        Int       @id @default(autoincrement())
-  hashId    String    @unique @map("hash_id")
+  hashId    String?    @unique @map("hash_id")
   userId    Int       @map("user_id")
   eventId   Int       @map("event_id")
   content   String    @db.Text
@@ -242,7 +242,7 @@ model Comment {
 
 model CommentReport {
   id         Int                 @id @default(autoincrement())
-  hashId     String              @unique @map("hash_id")
+  hashId     String?              @unique @map("hash_id")
   commentId  Int                 @map("comment_id")
   reportedBy Int                 @map("reported_by")
   reason     String              @db.Text
@@ -259,7 +259,7 @@ model CommentReport {
 
 model Participation {
   id                  Int                 @id @default(autoincrement())
-  hashId              String              @unique @map("hash_id")
+  hashId              String?              @unique @map("hash_id")
   userId              Int                 @map("user_id")
   eventId             Int                 @map("event_id")
   participationStatus ParticipationStatus @default(reviewed) @map("participation_status")
@@ -275,7 +275,7 @@ model Participation {
 
 model Notification {
   id        Int               @id @default(autoincrement())
-  hashId    String            @unique @map("hash_id")
+  hashId    String?            @unique @map("hash_id")
   userId    Int               @map("user_id")
   content   String            @db.Text
   type      NotificationTypes
