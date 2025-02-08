@@ -1,5 +1,10 @@
-import authRoute from './auth.route.js';
+import { Router } from 'express';
+import auth from './auth.route.js';
 
 export default (app) => {
-  app.use('/api/auth', authRoute);
+  const router = Router();
+
+  app.use('/api', router);
+
+  auth(router);
 };

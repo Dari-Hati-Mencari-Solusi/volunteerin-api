@@ -1,8 +1,19 @@
-import express from 'express';
-import { register } from '../controllers/auth.controller.js';
+import { Router } from 'express';
+import * as authController from '../controllers/auth.controller.js';
+import * as userMiddleware from '../middleware/user.js';
+import * as authValidation from '../middleware/validations/auth.js';
 
-const authRoute = express.Router();
+export default (app) => {
+  const router = Router();
 
-authRoute.post('/register', register);
+  app.use('/auth', router);
 
-export default authRoute;
+  router.post(
+    '/register',
+    authValidation.registerValidation,
+    userMiddleware.checkEmailandPhoneNumberExist,
+    authController.register,
+  );
+
+  router.post('/login', authValidation.loginValidation);
+};
