@@ -18,3 +18,17 @@ export const getAllEvents = async (query = {}) => {
     take: limit,
   });
 };
+
+export const createEvent = async (data) => {
+  return prisma.event.create({
+    data: {
+      ...data,
+      categories: {
+        connect: data.categories.map((id) => ({ id })),
+      },
+    },
+    include: {
+      categories: true,
+    },
+  });
+};
