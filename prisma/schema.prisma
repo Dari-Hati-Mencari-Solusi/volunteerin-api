@@ -7,70 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum LoginProviders {
-  local
-  google
-  facebook
-}
-
-enum Roles {
-  admin
-  student
-  people
-  partner
-}
-
-enum OrganizationTypes {
-  community
-  government
-  corporate
-  individual
-}
-
-enum NotificationTypes {
-  reminder
-  event_update
-  event_launching
-  custom
-}
-
-enum EducationLevels {
-  sma
-  smp
-  bachelor
-  higher
-}
-
-enum CommentReportStatus {
-  reviewed
-  dismissed
-  approved
-}
-
-enum ParticipationStatus {
-  reviewed
-  joined
-  completed
-  rejected
-}
-
-enum PartnerStatus {
-  pending
-  accepted
-  rejected
-}
-
 model User {
-  id            Int            @id @default(autoincrement())
-  hashId        String?         @unique @map("hash_id")
+  id            Int            @id @default(autoincrement())  
   name          String         @db.VarChar(125)
   email         String         @unique @db.VarChar(50)
   phoneNumber   String?        @unique @map("phone_number") @db.VarChar(20)
   password      String?        @db.VarChar
   socialId      String?        @map("social_id") @db.VarChar
-  role          Roles          @default(people)
+  role          Roles          @default(VOLUNTEER)
   avatarUrl     String?        @map("avatar_url") @db.VarChar
-  loginProvider LoginProviders @default(local) @map("login_provider")
+  loginProvider LoginProviders @default(LOCAL) @map("login_provider")
   isSubscribed  Boolean        @default(false) @map("is_subcribed")
   rememberToken String?        @map("remember_token") @db.VarChar
   lastLoginAt   DateTime?      @map("last_login_at")
@@ -79,8 +25,7 @@ model User {
   createdAt     DateTime?      @map("created_at")
   updatedAt     DateTime       @default(now()) @map("updated_at")
 
-  profile        UserProfile?
-  education      UserEducation?
+  profile        UserProfile?  
   location       UserLocation?
   partner        PartnerProfile?
   events         Event[]
@@ -94,8 +39,7 @@ model User {
 }
 
 model UserProfile {
-  id     Int     @id @default(autoincrement())
-  hashId String?  @unique @map("hash_id")
+  id     Int     @id @default(autoincrement())  
   userId Int     @unique @map("user_id")
   cv     String? @db.VarChar
 
@@ -104,30 +48,14 @@ model UserProfile {
   @@map("user_profiles")
 }
 
-model UserEducation {
-  id               Int             @id @default(autoincrement())
-  hashId           String?          @unique @map("hash_id")
-  userId           Int             @unique @map("user_id")
-  institutionName  String          @map("institution_name")
-  major            String?         @db.VarChar
-  educationLevel   EducationLevels @map("education_level")
-  studentCardUrl   String          @map("student_card_url")
-  identifierNumber String          @map("identifier_number") @db.VarChar(40)
-
-  user User @relation(fields: [userId], references: [id])
-
-  @@map("user_educations")
-}
-
 model PartnerProfile {
-  id                  Int               @id @default(autoincrement())
-  hashId              String?            @unique @map("hash_id")
+  id                  Int               @id @default(autoincrement())  
   userId              Int               @unique @map("user_id")
   organizationType    OrganizationTypes @map("organization_type")
   organizationAddress String            @map("organization_address") @db.Text
   instagram           String            @db.VarChar(50)
   eventQuota          Int               @default(1) @map("event_quota")
-  status              PartnerStatus     @default(pending)
+  status              PartnerStatus     @default(REVIEWED)
   information         String?           @db.Text
   createdAt           DateTime?         @map("created_at")
   updatedAt           DateTime          @default(now()) @map("updated_at")
@@ -139,8 +67,7 @@ model PartnerProfile {
 }
 
 model UserLocation {
-  id        Int      @id @default(autoincrement())
-  hashId    String?   @unique @map("hash_id")
+  id        Int      @id @default(autoincrement())  
   userId    Int      @unique @map("user_id")
   location  String
   latitude  Decimal  @db.Decimal(10, 8)
@@ -153,8 +80,7 @@ model UserLocation {
 }
 
 model ResponsiblePerson {
-  id               Int       @id @default(autoincrement())
-  hashId           String?    @unique @map("hash_id")
+  id               Int       @id @default(autoincrement())  
   partnerProfileId Int       @unique @map("partner_profile_id")
   nik              String    @unique @db.VarChar(30)
   fullName         String    @map("full_name") @db.VarChar(125)
@@ -170,8 +96,7 @@ model ResponsiblePerson {
 }
 
 model Event {
-  id                 Int       @id @default(autoincrement())
-  hashId             String?    @unique @map("hash_id")
+  id                 Int       @id @default(autoincrement())  
   userId             Int       @unique @map("user_id")
   title              String    @db.VarChar(100)
   startAt            DateTime  @map("start_at")
@@ -198,8 +123,7 @@ model Event {
 }
 
 model Category {
-  id          Int       @id @default(autoincrement())
-  hashId      String?    @unique @map("hash_id")
+  id          Int       @id @default(autoincrement())  
   name        String    @unique @db.VarChar(40)
   description String?   @db.Text
   createdAt   DateTime? @map("created_at")
@@ -211,8 +135,7 @@ model Category {
 }
 
 model UserSavedEvent {
-  id        Int       @id @default(autoincrement())
-  hashId    String?    @unique @map("hash_id")
+  id        Int       @id @default(autoincrement())  
   userId    Int       @map("user_id")
   eventId   Int       @map("event_id")
   createdAt DateTime? @map("created_at")
@@ -225,8 +148,7 @@ model UserSavedEvent {
 }
 
 model Comment {
-  id        Int       @id @default(autoincrement())
-  hashId    String?    @unique @map("hash_id")
+  id        Int       @id @default(autoincrement())  
   userId    Int       @map("user_id")
   eventId   Int       @map("event_id")
   content   String    @db.Text
@@ -241,12 +163,11 @@ model Comment {
 }
 
 model CommentReport {
-  id         Int                 @id @default(autoincrement())
-  hashId     String?              @unique @map("hash_id")
+  id         Int                 @id @default(autoincrement())  
   commentId  Int                 @map("comment_id")
   reportedBy Int                 @map("reported_by")
   reason     String              @db.Text
-  status     CommentReportStatus @default(reviewed)
+  status     CommentReportStatus @default(REVIEWED)
   reviewedAt DateTime?           @map("reviewed_at")
   createdAt  DateTime?           @map("created_at")
   updatedAt  DateTime            @default(now()) @map("updated_at")
@@ -258,11 +179,10 @@ model CommentReport {
 }
 
 model Participation {
-  id                  Int                 @id @default(autoincrement())
-  hashId              String?              @unique @map("hash_id")
+  id                  Int                 @id @default(autoincrement())  
   userId              Int                 @map("user_id")
   eventId             Int                 @map("event_id")
-  participationStatus ParticipationStatus @default(reviewed) @map("participation_status")
+  participationStatus ParticipationStatus @default(REVIEWED) @map("participation_status")
   completedAt         DateTime?           @map("completed_at")
   createdAt           DateTime?           @map("created_at")
   updatedAt           DateTime            @default(now()) @map("updated_at")
@@ -274,8 +194,7 @@ model Participation {
 }
 
 model Notification {
-  id        Int               @id @default(autoincrement())
-  hashId    String?            @unique @map("hash_id")
+  id        Int               @id @default(autoincrement())  
   userId    Int               @map("user_id")
   content   String            @db.Text
   type      NotificationTypes
@@ -285,4 +204,51 @@ model Notification {
   user      User              @relation(fields: [userId], references: [id])
 
   @@map("notifications")
+}
+
+enum LoginProviders {
+  LOCAL
+  GOOGLE
+  FACEBOOK
+}
+
+enum Roles {
+  ADMIN  
+  VOLUNTEER
+  PARTNER
+}
+
+enum OrganizationTypes {
+  COMMUNITY
+  GOVERNMENT
+  CORPORATE
+  INDIVIDUAL
+}
+
+enum NotificationTypes {
+  REMINDER
+  EVENT_UPDATE
+  EVENT_LAUNCHING
+  CUSTOM
+}
+
+enum CommentReportStatus {
+  REVIEWED
+  DISMISSED
+  APPROVED
+}
+
+enum ParticipationStatus {
+  REVIEWED
+  JOINED
+  ACCEPTED
+  COMPLETED
+  REJECTED
+  FINISHED
+}
+
+enum PartnerStatus {
+  REVIEWED
+  ACCEPTED
+  REJECTED
 }
