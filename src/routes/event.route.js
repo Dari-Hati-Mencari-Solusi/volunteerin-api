@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as eventController from '../controllers/event.controller.js';
+// import * as eventValidation from '../middleware/validations/event.js';
 
 export default (app) => {
   const router = Router();
