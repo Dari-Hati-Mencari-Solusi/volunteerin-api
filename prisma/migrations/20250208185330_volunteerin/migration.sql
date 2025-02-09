@@ -1,39 +1,35 @@
 -- CreateEnum
-CREATE TYPE "LoginProviders" AS ENUM ('local', 'google', 'facebook');
+CREATE TYPE "LoginProviders" AS ENUM ('LOCAL', 'GOOGLE', 'FACEBOOK');
 
 -- CreateEnum
-CREATE TYPE "Roles" AS ENUM ('admin', 'student', 'people', 'partner');
+CREATE TYPE "Roles" AS ENUM ('ADMIN', 'VOLUNTEER', 'PARTNER');
 
 -- CreateEnum
-CREATE TYPE "OrganizationTypes" AS ENUM ('community', 'government', 'corporate', 'individual');
+CREATE TYPE "OrganizationTypes" AS ENUM ('COMMUNITY', 'GOVERNMENT', 'CORPORATE', 'INDIVIDUAL');
 
 -- CreateEnum
-CREATE TYPE "NotificationTypes" AS ENUM ('reminder', 'event_update', 'event_launching', 'custom');
+CREATE TYPE "NotificationTypes" AS ENUM ('REMINDER', 'EVENT_UPDATE', 'EVENT_LAUNCHING', 'CUSTOM');
 
 -- CreateEnum
-CREATE TYPE "EducationLevels" AS ENUM ('sma', 'smp', 'bachelor', 'higher');
+CREATE TYPE "CommentReportStatus" AS ENUM ('REVIEWED', 'DISMISSED', 'APPROVED');
 
 -- CreateEnum
-CREATE TYPE "CommentReportStatus" AS ENUM ('reviewed', 'dismissed', 'approved');
+CREATE TYPE "ParticipationStatus" AS ENUM ('REVIEWED', 'JOINED', 'ACCEPTED', 'COMPLETED', 'REJECTED', 'FINISHED');
 
 -- CreateEnum
-CREATE TYPE "ParticipationStatus" AS ENUM ('reviewed', 'joined', 'completed', 'rejected');
-
--- CreateEnum
-CREATE TYPE "PartnerStatus" AS ENUM ('pending', 'accepted', 'rejected');
+CREATE TYPE "PartnerStatus" AS ENUM ('REVIEWED', 'ACCEPTED', 'REJECTED');
 
 -- CreateTable
 CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
     "name" VARCHAR(125) NOT NULL,
     "email" VARCHAR(50) NOT NULL,
     "phone_number" VARCHAR(20),
     "password" VARCHAR,
     "social_id" VARCHAR,
-    "role" "Roles" NOT NULL DEFAULT 'people',
+    "role" "Roles" NOT NULL DEFAULT 'VOLUNTEER',
     "avatar_url" VARCHAR,
-    "login_provider" "LoginProviders" NOT NULL DEFAULT 'local',
+    "login_provider" "LoginProviders" NOT NULL DEFAULT 'LOCAL',
     "is_subcribed" BOOLEAN NOT NULL DEFAULT false,
     "remember_token" VARCHAR,
     "last_login_at" TIMESTAMP(3),
@@ -48,7 +44,6 @@ CREATE TABLE "users" (
 -- CreateTable
 CREATE TABLE "user_profiles" (
     "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "cv" VARCHAR,
 
@@ -56,29 +51,14 @@ CREATE TABLE "user_profiles" (
 );
 
 -- CreateTable
-CREATE TABLE "user_educations" (
-    "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
-    "user_id" INTEGER NOT NULL,
-    "institution_name" TEXT NOT NULL,
-    "major" VARCHAR,
-    "education_level" "EducationLevels" NOT NULL,
-    "student_card_url" TEXT NOT NULL,
-    "identifier_number" VARCHAR(40) NOT NULL,
-
-    CONSTRAINT "user_educations_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "partner_profiles" (
     "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "organization_type" "OrganizationTypes" NOT NULL,
     "organization_address" TEXT NOT NULL,
     "instagram" VARCHAR(50) NOT NULL,
     "event_quota" INTEGER NOT NULL DEFAULT 1,
-    "status" "PartnerStatus" NOT NULL DEFAULT 'pending',
+    "status" "PartnerStatus" NOT NULL DEFAULT 'REVIEWED',
     "information" TEXT,
     "created_at" TIMESTAMP(3),
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -89,7 +69,6 @@ CREATE TABLE "partner_profiles" (
 -- CreateTable
 CREATE TABLE "user_locations" (
     "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "location" TEXT NOT NULL,
     "latitude" DECIMAL(10,8) NOT NULL,
@@ -102,7 +81,6 @@ CREATE TABLE "user_locations" (
 -- CreateTable
 CREATE TABLE "responsible_persons" (
     "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
     "partner_profile_id" INTEGER NOT NULL,
     "nik" VARCHAR(30) NOT NULL,
     "full_name" VARCHAR(125) NOT NULL,
@@ -118,7 +96,6 @@ CREATE TABLE "responsible_persons" (
 -- CreateTable
 CREATE TABLE "events" (
     "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "title" VARCHAR(100) NOT NULL,
     "start_at" TIMESTAMP(3) NOT NULL,
@@ -140,7 +117,6 @@ CREATE TABLE "events" (
 -- CreateTable
 CREATE TABLE "categories" (
     "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
     "name" VARCHAR(40) NOT NULL,
     "description" TEXT,
     "created_at" TIMESTAMP(3),
@@ -152,7 +128,6 @@ CREATE TABLE "categories" (
 -- CreateTable
 CREATE TABLE "user_saved_events" (
     "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "event_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3),
@@ -164,7 +139,6 @@ CREATE TABLE "user_saved_events" (
 -- CreateTable
 CREATE TABLE "comments" (
     "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "event_id" INTEGER NOT NULL,
     "content" TEXT NOT NULL,
@@ -177,11 +151,10 @@ CREATE TABLE "comments" (
 -- CreateTable
 CREATE TABLE "comment_reports" (
     "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
     "comment_id" INTEGER NOT NULL,
     "reported_by" INTEGER NOT NULL,
     "reason" TEXT NOT NULL,
-    "status" "CommentReportStatus" NOT NULL DEFAULT 'reviewed',
+    "status" "CommentReportStatus" NOT NULL DEFAULT 'REVIEWED',
     "reviewed_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3),
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -192,10 +165,9 @@ CREATE TABLE "comment_reports" (
 -- CreateTable
 CREATE TABLE "participations" (
     "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "event_id" INTEGER NOT NULL,
-    "participation_status" "ParticipationStatus" NOT NULL DEFAULT 'reviewed',
+    "participation_status" "ParticipationStatus" NOT NULL DEFAULT 'REVIEWED',
     "completed_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3),
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -206,7 +178,6 @@ CREATE TABLE "participations" (
 -- CreateTable
 CREATE TABLE "notifications" (
     "id" SERIAL NOT NULL,
-    "hash_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "content" TEXT NOT NULL,
     "type" "NotificationTypes" NOT NULL,
@@ -226,40 +197,19 @@ CREATE TABLE "_CategoryToEvent" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "users_hash_id_key" ON "users"("hash_id");
-
--- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_phone_number_key" ON "users"("phone_number");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_profiles_hash_id_key" ON "user_profiles"("hash_id");
-
--- CreateIndex
 CREATE UNIQUE INDEX "user_profiles_user_id_key" ON "user_profiles"("user_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "user_educations_hash_id_key" ON "user_educations"("hash_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "user_educations_user_id_key" ON "user_educations"("user_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "partner_profiles_hash_id_key" ON "partner_profiles"("hash_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "partner_profiles_user_id_key" ON "partner_profiles"("user_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_locations_hash_id_key" ON "user_locations"("hash_id");
-
--- CreateIndex
 CREATE UNIQUE INDEX "user_locations_user_id_key" ON "user_locations"("user_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "responsible_persons_hash_id_key" ON "responsible_persons"("hash_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "responsible_persons_partner_profile_id_key" ON "responsible_persons"("partner_profile_id");
@@ -268,43 +218,19 @@ CREATE UNIQUE INDEX "responsible_persons_partner_profile_id_key" ON "responsible
 CREATE UNIQUE INDEX "responsible_persons_nik_key" ON "responsible_persons"("nik");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "events_hash_id_key" ON "events"("hash_id");
-
--- CreateIndex
 CREATE UNIQUE INDEX "events_user_id_key" ON "events"("user_id");
 
 -- CreateIndex
 CREATE INDEX "events_title_idx" ON "events"("title");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "categories_hash_id_key" ON "categories"("hash_id");
-
--- CreateIndex
 CREATE UNIQUE INDEX "categories_name_key" ON "categories"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "user_saved_events_hash_id_key" ON "user_saved_events"("hash_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "comments_hash_id_key" ON "comments"("hash_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "comment_reports_hash_id_key" ON "comment_reports"("hash_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "participations_hash_id_key" ON "participations"("hash_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "notifications_hash_id_key" ON "notifications"("hash_id");
 
 -- CreateIndex
 CREATE INDEX "_CategoryToEvent_B_index" ON "_CategoryToEvent"("B");
 
 -- AddForeignKey
 ALTER TABLE "user_profiles" ADD CONSTRAINT "user_profiles_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "user_educations" ADD CONSTRAINT "user_educations_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "partner_profiles" ADD CONSTRAINT "partner_profiles_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

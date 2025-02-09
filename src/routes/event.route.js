@@ -8,11 +8,12 @@ export default (app) => {
   const router = Router();
 
   app.use('/events', router);
+
   router.post(
     '/',
     eventMiddleware.isAdminOrPartner,
     upload.single('banner'),
-    eventValidation.eventValidation,
+    eventValidation.validateEventCreate,
     eventController.createEvent,
   );
 

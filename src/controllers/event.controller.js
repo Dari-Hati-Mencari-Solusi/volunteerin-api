@@ -1,5 +1,6 @@
 import * as eventModel from '../models/Event.js';
 import { uploadToImageKit } from '../utils/imagekit.js';
+import { HttpError } from '../utils/error.js';
 
 export const getAllEvents = async (req, res, next) => {
   try {
@@ -16,29 +17,15 @@ export const getAllEvents = async (req, res, next) => {
 
 export const createEvent = async (req, res, next) => {
   try {
-    const bannerFile = req.file;
-    if (!bannerFile) {
-      return res.status(400).json({
-        message: 'Banner event harus diunggah!',
-      });
-    }
+    const { id: userId } = req.user;
+    const { validatedEventData } = req;
 
-    if (!req.body.categories || !Array.isArray(req.body.categories)) {
-      return res.status(400).json({
-        message: 'Categories harus berupa array!',
-      });
-    }
+    const imageUrl = await uploadToImageKit(req.file);
 
-    const imageUrl = await uploadToImageKit(bannerFile);
     const eventData = {
-      ...req.body,
-      userId: req.user.id,
+      ...validatedEventData,
+      userId,
       bannerUrl: imageUrl,
-      startAt: new Date(req.body.startAt),
-      endAt: req.body.endAt ? new Date(req.body.endAt) : null,
-      latitude: parseFloat(req.body.latitude),
-      longitude: parseFloat(req.body.longitude),
-      categories: req.body.categories.map(Number),
     };
 
     const event = await eventModel.createEvent(eventData);

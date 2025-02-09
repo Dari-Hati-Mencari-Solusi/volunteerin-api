@@ -1,34 +1,43 @@
-import { PrismaClient } from '@prisma/client';
-import { fakerID_ID as faker } from '@faker-js/faker';
+import Joi from 'joi';
+import { generateJoiError } from '../../utils/joi.js';
 
-const prisma = new PrismaClient();
+const eventSchema = Joi.object({
+  title: Joi.string().required(),
+  description: Joi.string().required(),
+  startAt: Joi.date().required(),
+  endAt: Joi.date().greater(Joi.ref('startAt')),
+  termsAndConditions: Joi.string(),
+  contactPerson: Joi.string().required(),
+  location: Joi.string().required(),
+  latitude: Joi.number().required(),
+  longitude: Joi.number().required(),
+  categories: Joi.array().items(Joi.number()).min(1).required(),
+  isRelease: Joi.boolean().default(false),
+});
 
-const events = Array.from({ length: 10 }).map(() => ({
-  userId: 1,
-  title: faker.commerce.productName(),
-  startAt: faker.date.future(),
-  endAt: faker.date.future(),
-  bannerUrl: faker.image.url(),
-  description: faker.lorem.paragraph(),
-  termsAndConditions: faker.lorem.paragraph(),
-  isRelease: faker.datatype.boolean(),
-  contactPerson: faker.phone.number('628##########'),
-  location: faker.location.city(),
-  latitude: faker.location.latitude(),
-  longitude: faker.location.longitude(),
-}));
-
-const seedEvents = async () => {
-  for (const event of events) {
-    await prisma.event.create({
-      data: {
-        ...event,
-        categories: {
-          connect: [{ id: 1 }],
-        },
-      },
-    });
+export const validateEventCreate = (req, res, next) => {
+  // Validate banner
+  if (!req.file) {
+    return generateJoiError('Banner event harus diunggah');
   }
-};
 
-export default seedEvents;
+  // Validate body
+  const { error, value } = eventSchema.validate(req.body, {
+    abortEarly: false,
+  });
+
+  if (error) {
+    return generateJoiError(error);
+  }
+
+  req.validatedEventData = {
+    ...value,
+    startAt: new Date(value.startAt),
+    endAt: value.endAt ? new Date(value.endAt) : null,
+    latitude: parseFloat(value.latitude),
+    longitude: parseFloat(value.longitude),
+    categories: value.categories.map(Number),
+  };
+
+  next();
+};
