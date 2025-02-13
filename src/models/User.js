@@ -4,23 +4,12 @@ export const getUserById = async (id) => {
   return prisma.user.findUnique({ where: { id } });
 };
 
-export const getUserByEmail = async (email, role = null) => {
-  const query = { email };
-  if (role) query.role = role;
-
-  return prisma.user.findFirst({ where: query });
+export const getUserByEmail = async (email) => {
+  return prisma.user.findFirst({ where: { email } });
 };
 
 export const getUserByPhoneNumber = async (phoneNumber) => {
   return prisma.user.findUnique({ where: { phoneNumber } });
-};
-
-export const getUserByEmailandPassword = async (
-  email,
-  password,
-  role = 'VOLUNTEER',
-) => {
-  return prisma.user.findFirst({ where: { email, password, role } });
 };
 
 export const createUser = async (data) => {
@@ -29,4 +18,40 @@ export const createUser = async (data) => {
 
 export const createUsers = async (data) => {
   return prisma.user.createMany({ data });
+};
+
+export const verifyUser = async (id) => {
+  const now = new Date();
+
+  return prisma.user.update({
+    where: { id },
+    data: {
+      verifiedAt: now,
+      updatedAt: now,
+    },
+  });
+};
+
+export const updatePassword = async (id, password) => {
+  const now = new Date();
+
+  return prisma.user.update({
+    where: { id },
+    data: {
+      password,
+      updatedAt: now,
+    },
+  });
+};
+
+export const logUserLogin = async (id) => {
+  const now = new Date();
+
+  return prisma.user.update({
+    where: { id },
+    data: {
+      lastLoginAt: now,
+      updatedAt: now,
+    },
+  });
 };
