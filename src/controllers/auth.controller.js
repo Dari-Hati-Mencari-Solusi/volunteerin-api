@@ -141,7 +141,7 @@ export const forgotPassword = async (req, res, next) => {
 
   try {
     const payload = {
-      email: user.email,
+      id: user.id,
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
       expiresIn: '30m',
@@ -152,13 +152,13 @@ export const forgotPassword = async (req, res, next) => {
       name: user.name,
     };
     const recipients = ['volunteerinbusiness@gmail.com'];
-    const verifyUrl = `${process.env.FE_BASE_URL}/verify-email?t=${token}`;
-    const subject = `Verifikasi Akun Volunteerin ${user.role === 'PARTNER' ? 'Partner' : ''} kamu`;
+    const verifyUrl = `${process.env.FE_BASE_URL}/reset-pw?t=${token}`;
+    const subject = `Reset Password`;
     await sendEmail(
       sender,
       recipients,
       subject,
-      `<p>Your verification url: <a href="${verifyUrl}">Klik disini</a></p>`,
+      `<p>Your reset password url: <a href="${verifyUrl}">Klik disini</a></p>`,
     );
 
     res.status(200).json({

@@ -47,7 +47,6 @@ export default (app) => {
   router.post(
     '/reset-password',
     authValidation.resetPasswordValidation,
-    userMiddleware.checkUserExist,
     authController.resetPassword,
   );
 
