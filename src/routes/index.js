@@ -5,7 +5,7 @@ import events from './event.route.js';
 export default (app) => {
   const router = Router();
 
-  app.use('/api', router);
+  app.use('/', router);
 
   auth(router);
   events(router);

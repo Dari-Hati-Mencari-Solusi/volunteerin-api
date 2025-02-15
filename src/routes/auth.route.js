@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as authController from '../controllers/auth.controller.js';
+import * as oauthController from '../controllers/oauth.controller.js';
 import * as userMiddleware from '../middleware/user.js';
 import * as authMiddleware from '../middleware/auth.js';
 import * as authValidation from '../middleware/validations/auth.js';
@@ -49,6 +50,10 @@ export default (app) => {
     authValidation.resetPasswordValidation,
     authController.resetPassword,
   );
+
+  router.get('/google', oauthController.loginGoogle);
+
+  router.get('/google/callback', oauthController.callbackLoginGoogle);
 
   router.get('/me', authMiddleware.isAuthenticate, authController.me);
 };
