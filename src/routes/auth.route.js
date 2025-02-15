@@ -50,5 +50,5 @@ export default (app) => {
     authController.resetPassword,
   );
 
-  router.get('/test', authMiddleware.isAuthenticate, authController.testing);
+  router.get('/me', authMiddleware.isAuthenticate, authController.me);
 };

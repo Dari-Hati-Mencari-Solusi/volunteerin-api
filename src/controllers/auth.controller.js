@@ -199,6 +199,11 @@ export const resetPassword = async (req, res, next) => {
   }
 };
 
-export const testing = async (_req, res, _next) => {
-  return res.status(200).json({ message: 'success' });
+export const me = async (req, res, _next) => {
+  const { user } = req;
+
+  res.status(200).json({
+    message: 'success',
+    data: user,
+  });
 };
