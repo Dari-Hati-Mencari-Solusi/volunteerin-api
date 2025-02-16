@@ -3,6 +3,7 @@ import * as userModel from '../models/User.js';
 import * as cryptos from '../utils/crypto.js';
 import jwt from 'jsonwebtoken';
 import { HttpError } from '../utils/error.js';
+import { generateToken } from '../utils/jwt.js';
 
 export const register = async (req, res, next) => {
   const { name, email, password, phoneNumber, role } = req.body;
@@ -20,9 +21,7 @@ export const register = async (req, res, next) => {
     });
 
     const payload = { id: user.id };
-    const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
-      expiresIn: '30m',
-    });
+    const token = generateToken(payload, '30m');
 
     const sender = {
       address: user.email,
@@ -64,9 +63,7 @@ export const login = async (req, res, next) => {
     }
 
     const payload = { id: user.id };
-    const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
-      expiresIn: '1d',
-    });
+    const token = generateToken(payload, '1d');
 
     await userModel.logUserLogin(user.id);
 
@@ -109,9 +106,7 @@ export const resendEmailVerification = async (req, res, next) => {
   const { user } = req;
   try {
     const payload = { id: user.id };
-    const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
-      expiresIn: '30m',
-    });
+    const token = generateToken(payload, '30m');
 
     const sender = {
       address: user.email,
@@ -140,12 +135,8 @@ export const forgotPassword = async (req, res, next) => {
   const { user } = req;
 
   try {
-    const payload = {
-      id: user.id,
-    };
-    const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
-      expiresIn: '30m',
-    });
+    const payload = { id: user.id };
+    const token = generateToken(payload, '30m');
 
     const sender = {
       address: user.email,
