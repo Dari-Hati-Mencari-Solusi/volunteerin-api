@@ -38,12 +38,19 @@ export const callbackLoginGoogle = async (req, res, next) => {
     let user = await userModel.getUserByEmail(data.email);
 
     if (!user) {
+      const now = new Date();
+
       user = await userModel.createUser({
         name: data.name,
         email: data.email,
         avatarUrl: data.picture ?? '',
+        loginProvider: 'GOOGLE',
+        createdAt: now,
+        verifiedAt: now,
       });
     }
+
+    await userModel.logUserLogin(user.id);
 
     const token = generateToken({ id: user.id }, '1d');
 
