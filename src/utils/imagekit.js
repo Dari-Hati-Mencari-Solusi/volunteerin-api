@@ -1,11 +1,5 @@
-import ImageKit from 'imagekit';
+import imagekit from '../configs/imageKitConfig.js';
 import { HttpError } from './error.js';
-
-const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
-});
 
 export const uploadToImageKit = async (file) => {
   try {
@@ -14,6 +8,7 @@ export const uploadToImageKit = async (file) => {
     }
 
     const base64 = file.buffer.toString('base64');
+
     const uploadResponse = await imagekit.upload({
       file: base64,
       fileName: `${Date.now()}-${file.originalname}`,
@@ -21,14 +16,8 @@ export const uploadToImageKit = async (file) => {
 
     return uploadResponse.url;
   } catch (err) {
-    throw new HttpError('Gagal mengunggah gambar!', 500);
-  }
-};
-
-export const deleteFromImageKit = async (fileId) => {
-  try {
-    await imagekit.deleteFile(fileId);
-  } catch (err) {
-    throw new HttpError('Gagal menghapus gambar!', 500);
+    throw err instanceof HttpError
+      ? err
+      : new HttpError('Gagal mengunggah gambar!', 500);
   }
 };

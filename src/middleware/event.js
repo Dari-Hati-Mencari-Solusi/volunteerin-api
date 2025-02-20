@@ -29,11 +29,9 @@ export const isAdminOrPartner = async (req, res, next) => {
     if (error instanceof jwt.JsonWebTokenError) {
       throw new HttpError('Token bermasalah!', 401);
     }
-
     if (error instanceof jwt.TokenExpiredError) {
       throw new HttpError('Token kadaluarsa!', 401);
     }
-
     next(error);
   }
 };

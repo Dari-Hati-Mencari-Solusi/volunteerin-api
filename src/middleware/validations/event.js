@@ -1,4 +1,3 @@
-// src/middleware/validations/event.js
 import Joi from 'joi';
 import { generateJoiError } from '../../utils/joi.js';
 
@@ -7,25 +6,28 @@ const eventSchema = Joi.object({
   description: Joi.string().required(),
   startAt: Joi.date().required(),
   endAt: Joi.date().greater(Joi.ref('startAt')),
-  termsAndConditions: Joi.string(),
+  termsAndConditions: Joi.string().allow(''),
   contactPerson: Joi.string().required(),
   location: Joi.string().required(),
   latitude: Joi.number().required(),
   longitude: Joi.number().required(),
-  categories: Joi.array().items(Joi.number()).min(1).required(),
+  categories: Joi.alternatives()
+    .try(Joi.array().items(Joi.number()).min(1), Joi.string())
+    .required(),
   isRelease: Joi.boolean().default(false),
+}).options({
+  stripUnknown: true,
+  abortEarly: false,
 });
 
 export const validateEventCreate = async (req, res, next) => {
   try {
-    // Validate banner
-    if (!req.file) {
+    if (!req.file && !req.files) {
       return res.status(400).json({
         message: 'Banner event harus diunggah!',
       });
     }
 
-    // Validate body
     const { error, value } = eventSchema.validate(req.body, {
       abortEarly: false,
     });
@@ -34,7 +36,6 @@ export const validateEventCreate = async (req, res, next) => {
       return generateJoiError(error);
     }
 
-    // Assign validated and transformed values back to req.body
     req.validatedEventData = {
       ...value,
       startAt: new Date(value.startAt),
@@ -49,5 +50,3 @@ export const validateEventCreate = async (req, res, next) => {
     next(error);
   }
 };
-
-export const eventValidation = validateEventCreate;

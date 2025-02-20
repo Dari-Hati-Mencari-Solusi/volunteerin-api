@@ -1,9 +1,11 @@
 import multer from 'multer';
 import { HttpError } from './error.js';
 
-/**
- * Konfigurasi untuk file filtering
- */
+const limits = {
+  fileSize: 3 * 1024 * 1024, //3MB
+  files: 1,
+};
+
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
@@ -12,21 +14,21 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-/**
- * Konfigurasi untuk file size limits
- */
-const limits = {
-  fileSize: 5 * 1024 * 1024, // 5MB
-  files: 1, // Max number of files
-};
-
-/**
- * Inisialisasi multer dengan memory storage
- */
 const upload = multer({
   storage: multer.memoryStorage(),
   fileFilter: fileFilter,
   limits: limits,
-});
+}).single('banner');
 
-export default upload;
+const uploadMiddleware = (req, res, next) => {
+  upload(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      return next(new HttpError(`Error upload file: ${err.message}`, 400));
+    } else if (err) {
+      return next(err);
+    }
+    next();
+  });
+};
+
+export default uploadMiddleware;

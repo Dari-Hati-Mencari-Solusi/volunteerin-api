@@ -1,4 +1,5 @@
 import prisma from '../configs/dbConfig.js';
+import { HttpError } from '../utils/error.js';
 
 export const getAllEvents = async (query = {}) => {
   const { page = 1, limit = 10, search = '' } = query;
@@ -19,16 +20,27 @@ export const getAllEvents = async (query = {}) => {
   });
 };
 
-export const createEvent = async (data) => {
-  return prisma.event.create({
-    data: {
-      ...data,
-      categories: {
-        connect: data.categories.map((id) => ({ id })),
+export const createEvent = async (eventData) => {
+  try {
+    const event = await prisma.event.create({
+      data: {
+        ...eventData,
+        categories: {
+          create: eventData.categories.map((categoryId) => ({
+            categoryId: categoryId,
+          })),
+        },
       },
-    },
-    include: {
-      categories: true,
-    },
-  });
+      include: {
+        categories: true,
+        user: true,
+      },
+    });
+    return event;
+  } catch (error) {
+    if (error.code === 'P2002') {
+      throw new HttpError('User sudah memiliki event yang terdaftar', 400);
+    }
+    throw error;
+  }
 };
