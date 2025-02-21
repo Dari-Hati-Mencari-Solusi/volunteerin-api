@@ -18,4 +18,5 @@ export default (app) => {
   );
 
   router.get('/', eventController.getAllEvents);
+  router.get('/:id', eventController.getEventById);
 };
