@@ -17,6 +17,21 @@ export default (app) => {
     eventController.createEvent,
   );
 
+  router.put(
+    '/:id',
+    eventMiddleware.isAdminOrPartner,
+    uploadMiddleware,
+    eventValidation.validateEventUpdate,
+    eventController.updateEvent,
+  );
+
+  router.delete(
+    '/:id',
+    eventMiddleware.isAdminOrPartner,
+    eventController.deleteEvent,
+  );
+
+  //public api
   router.get('/', eventController.getAllEvents);
   router.get('/:id', eventController.getEventById);
 };

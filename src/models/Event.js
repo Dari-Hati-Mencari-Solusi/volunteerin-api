@@ -142,3 +142,58 @@ export const createEvent = async (eventData) => {
     throw error;
   }
 };
+
+export const updateEvent = async (id, eventData) => {
+  try {
+    const event = await prisma.event.update({
+      where: { id },
+      data: {
+        title: eventData.title,
+        description: eventData.description,
+        startAt: eventData.startAt,
+        endAt: eventData.endAt,
+        termsAndConditions: eventData.termsAndConditions,
+        contactPerson: eventData.contactPerson,
+        location: eventData.location,
+        latitude: eventData.latitude,
+        longitude: eventData.longitude,
+        bannerUrl: eventData.bannerUrl,
+        isRelease: eventData.isRelease,
+        categories: {
+          set: eventData.categories.map((categoryId) => ({ id: categoryId })),
+        },
+      },
+      include: {
+        categories: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return event;
+  } catch (error) {
+    if (error.code === 'P2025') {
+      throw new HttpError('Event tidak ditemukan', 404);
+    }
+    console.error('Error updating event:', error);
+    throw error;
+  }
+};
+
+export const deleteEvent = async (id) => {
+  try {
+    await prisma.event.delete({
+      where: { id },
+    });
+  } catch (error) {
+    if (error.code === 'P2025') {
+      throw new HttpError('Event tidak ditemukan', 404);
+    }
+    throw error;
+  }
+};

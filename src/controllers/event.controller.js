@@ -84,9 +84,90 @@ export const createEvent = async (req, res, next) => {
       data: event,
     });
   } catch (error) {
-    // Jika error bukan instance dari HttpError, akan diteruskan ke error handler global
     if (!(error instanceof HttpError)) {
       console.error('Error creating event:', error);
+    }
+    next(error);
+  }
+};
+
+export const updateEvent = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { id: userId } = req.user;
+    const { validatedEventData } = req;
+
+    if (!id || isNaN(id)) {
+      throw new HttpError('ID event tidak valid', 400);
+    }
+
+    const existingEvent = await eventModel.getEventById(id);
+
+    if (!existingEvent) {
+      throw new HttpError('Event tidak ditemukan', 404);
+    }
+
+    if (existingEvent.userId !== userId && req.user.role !== 'ADMIN') {
+      throw new HttpError(
+        'Anda tidak memiliki akses untuk mengubah event ini',
+        403,
+      );
+    }
+
+    let imageUrl = existingEvent.bannerUrl;
+    if (req.file) {
+      imageUrl = await uploadToImageKit(req.file);
+    }
+
+    const eventData = {
+      ...validatedEventData,
+      bannerUrl: imageUrl,
+    };
+
+    const event = await eventModel.updateEvent(parseInt(id), eventData);
+
+    res.status(200).json({
+      message: 'Event berhasil diperbarui',
+      data: event,
+    });
+  } catch (error) {
+    if (!(error instanceof HttpError)) {
+      console.error('Error updating event:', error);
+    }
+    next(error);
+  }
+};
+
+export const deleteEvent = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { id: userId } = req.user;
+
+    if (!id || isNaN(id)) {
+      throw new HttpError('ID event tidak valid', 400);
+    }
+
+    const existingEvent = await eventModel.getEventById(id);
+
+    if (!existingEvent) {
+      throw new HttpError('Event tidak ditemukan', 404);
+    }
+
+    if (existingEvent.userId !== userId && req.user.role !== 'ADMIN') {
+      throw new HttpError(
+        'Anda tidak memiliki akses untuk menghapus event ini',
+        403,
+      );
+    }
+
+    await eventModel.deleteEvent(parseInt(id));
+
+    res.status(200).json({
+      message: 'Event berhasil dihapus',
+    });
+  } catch (error) {
+    if (!(error instanceof HttpError)) {
+      console.error('Error deleting event:', error);
     }
     next(error);
   }
