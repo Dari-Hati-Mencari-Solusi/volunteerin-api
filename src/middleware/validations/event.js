@@ -37,16 +37,12 @@ export const validateEventCreate = async (req, res, next) => {
       return generateJoiError(error);
     }
 
-    // Handle categories baik string maupun array
     let categories = value.categories;
     if (typeof categories === 'string') {
-      // Jika string, split by comma atau convert single value ke array
       categories = categories.split(',').map(Number);
     } else if (Array.isArray(categories)) {
-      // Jika sudah array, convert setiap item ke number
       categories = categories.map(Number);
     } else {
-      // Jika bukan keduanya, throw error
       throw new HttpError('Format categories tidak valid', 400);
     }
 
@@ -56,7 +52,41 @@ export const validateEventCreate = async (req, res, next) => {
       endAt: value.endAt ? new Date(value.endAt) : null,
       latitude: parseFloat(value.latitude),
       longitude: parseFloat(value.longitude),
-      categories: categories, // Gunakan categories yang sudah dihandle
+      categories: categories,
+    };
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const validateEventUpdate = async (req, res, next) => {
+  try {
+    const { error, value } = eventSchema.validate(req.body, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      return generateJoiError(error);
+    }
+
+    let categories = value.categories;
+    if (typeof categories === 'string') {
+      categories = categories.split(',').map(Number);
+    } else if (Array.isArray(categories)) {
+      categories = categories.map(Number);
+    } else {
+      throw new HttpError('Format categories tidak valid', 400);
+    }
+
+    req.validatedEventData = {
+      ...value,
+      startAt: new Date(value.startAt),
+      endAt: value.endAt ? new Date(value.endAt) : null,
+      latitude: parseFloat(value.latitude),
+      longitude: parseFloat(value.longitude),
+      categories: categories,
     };
 
     next();
