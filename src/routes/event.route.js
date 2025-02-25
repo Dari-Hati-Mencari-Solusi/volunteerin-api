@@ -1,6 +1,7 @@
 import { Router } from 'express';
+import * as authMiddleware from '../middleware/auth.js';
 import * as eventController from '../controllers/event.controller.js';
-import * as eventMiddleware from '../middleware/event.js';
+import * as accessMiddleware from '../middleware/access.js';
 import * as eventValidation from '../middleware/validations/event.js';
 import uploadMiddleware from '../utils/multer.js';
 
@@ -11,7 +12,8 @@ export default (app) => {
 
   router.post(
     '/',
-    eventMiddleware.isAdminOrPartner,
+    authMiddleware.isAuthenticate,
+    accessMiddleware.isAdminOrPartner,
     uploadMiddleware,
     eventValidation.validateEventCreate,
     eventController.createEvent,
@@ -19,7 +21,8 @@ export default (app) => {
 
   router.put(
     '/:id',
-    eventMiddleware.isAdminOrPartner,
+    authMiddleware.isAuthenticate,
+    accessMiddleware.isAdminOrPartner,
     uploadMiddleware,
     eventValidation.validateEventUpdate,
     eventController.updateEvent,
@@ -27,7 +30,8 @@ export default (app) => {
 
   router.delete(
     '/:id',
-    eventMiddleware.isAdminOrPartner,
+    authMiddleware.isAuthenticate,
+    accessMiddleware.isAdminOrPartner,
     eventController.deleteEvent,
   );
 
