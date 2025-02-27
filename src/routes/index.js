@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import auth from './auth.route.js';
 import events from './event.route.js';
-import partners from './partner.route.js';
+import partners from './partnerProfile.route.js';
 
 export default (app) => {
   const router = Router();
