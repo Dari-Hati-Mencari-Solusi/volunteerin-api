@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())  
+  id            String         @id @default(uuid()) @db.Uuid()
   name          String         @db.VarChar(125)
   email         String         @unique @db.VarChar(50)
   phoneNumber   String?        @unique @map("phone_number") @db.VarChar(20)
@@ -19,29 +19,32 @@ model User {
   loginProvider LoginProviders @default(LOCAL) @map("login_provider")
   isSubscribed  Boolean        @default(false) @map("is_subcribed")
   rememberToken String?        @map("remember_token") @db.VarChar
-  lastLoginAt   DateTime?      @map("last_login_at")
-  verifiedAt    DateTime?      @map("verified_at")
-  deletedAt     DateTime?      @map("deleted_at")
-  createdAt     DateTime?      @map("created_at")
-  updatedAt     DateTime       @default(now()) @map("updated_at")
 
-  profile        UserProfile?  
-  location       UserLocation?
-  partner        PartnerProfile?
-  events         Event[]
-  participations Participation[]
-  notifications  Notification[]
-  comments       Comment[]
-  reports        CommentReport[]
-  bookmarkEvents UserSavedEvent[]
+  lastLoginAt DateTime? @map("last_login_at")
+  verifiedAt  DateTime? @map("verified_at")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime? @map("created_at")
+  updatedAt   DateTime? @default(now()) @map("updated_at")
+
+  profile           UserProfile?
+  location          UserLocation?
+  partner           PartnerProfile?
+  events            Event[]
+  participations    Participant[]
+  notifications     Notification[]
+  bookmarkEvents    UserSavedEvent[]
+  userEventBenefits UserEventBenefit[]
 
   @@map("users")
 }
 
 model UserProfile {
-  id     Int     @id @default(autoincrement())  
-  userId Int     @unique @map("user_id")
+  id     String  @id @default(uuid()) @db.Uuid
+  userId String  @unique @map("user_id") @db.Uuid
   cv     String? @db.VarChar
+
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime? @default(now()) @map("updated_at")
 
   user User @relation(fields: [userId], references: [id])
 
@@ -49,8 +52,8 @@ model UserProfile {
 }
 
 model PartnerProfile {
-  id                  Int               @id @default(autoincrement())  
-  userId              Int               @unique @map("user_id")
+  id                  String            @id @default(uuid()) @db.Uuid
+  userId              String            @unique @map("user_id") @db.Uuid
   organizationType    OrganizationTypes @map("organization_type")
   organizationAddress String            @map("organization_address") @db.Text
   instagram           String            @db.VarChar(50)
@@ -58,21 +61,24 @@ model PartnerProfile {
   status              PartnerStatus     @default(REVIEWED)
   information         String?           @db.Text
   createdAt           DateTime?         @map("created_at")
-  updatedAt           DateTime          @default(now()) @map("updated_at")
+  updatedAt           DateTime?         @default(now()) @map("updated_at")
 
   user               User               @relation(fields: [userId], references: [id])
   responsiblePersons ResponsiblePerson?
+  legality           Legality?
 
   @@map("partner_profiles")
 }
 
 model UserLocation {
-  id        Int      @id @default(autoincrement())  
-  userId    Int      @unique @map("user_id")
+  id        String  @id @default(uuid()) @db.Uuid
+  userId    String  @unique @map("user_id") @db.Uuid
   location  String
-  latitude  Decimal  @db.Decimal(10, 8)
-  longitude Decimal  @db.Decimal(11, 8)
-  updatedAt DateTime @default(now()) @map("updated_at")
+  latitude  Decimal @db.Decimal(10, 8)
+  longitude Decimal @db.Decimal(11, 8)
+
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime? @default(now()) @map("updated_at")
 
   user User @relation(fields: [userId], references: [id])
 
@@ -80,54 +86,85 @@ model UserLocation {
 }
 
 model ResponsiblePerson {
-  id               Int       @id @default(autoincrement())  
-  partnerProfileId Int       @unique @map("partner_profile_id")
-  nik              String    @unique @db.VarChar(30)
+  id               String    @id @default(uuid()) @db.Uuid
+  partnerProfileId String    @unique @map("partner_profile_id") @db.Uuid
+  nik              String    @db.VarChar(30)
   fullName         String    @map("full_name") @db.VarChar(125)
   phoneNumber      String    @map("phone_number") @db.VarChar(20)
   position         String    @db.VarChar(50)
   ktpUrl           String    @map("ktp_url") @db.VarChar
   createdAt        DateTime? @map("created_at")
-  updatedAt        DateTime  @default(now()) @map("updated_at")
+  updatedAt        DateTime? @default(now()) @map("updated_at")
 
   partnerProfile PartnerProfile @relation(fields: [partnerProfileId], references: [id])
 
   @@map("responsible_persons")
 }
 
-model Event {
-  id                 Int       @id @default(autoincrement())  
-  userId             Int       @unique @map("user_id")
-  title              String    @db.VarChar(100)
-  startAt            DateTime  @map("start_at")
-  endAt              DateTime? @map("end_at")
-  bannerUrl          String    @map("banner_url")
-  description        String    @db.Text
-  termsAndConditions String?   @map("terms_and_conditions") @db.Text
-  isRelease          Boolean   @default(false) @map("is_release")
-  contactPerson      String    @map("contact_person") @db.VarChar(15)
-  location           String
-  latitude           Decimal   @db.Decimal(10, 8)
-  longitude          Decimal   @db.Decimal(11, 8)
-  createdAt          DateTime? @map("created_at")
-  updatedAt          DateTime  @default(now()) @map("updated_at")
+model Legality {
+  id               String @id @default(uuid()) @db.Uuid
+  partnerProfileId String @unique @map("partner_profile_id") @db.Uuid
 
-  user            User             @relation(fields: [userId], references: [id])
-  categories      Category[]
-  userSavedEvents UserSavedEvent[]
-  comments        Comment[]
-  participations  Participation[]
-  
+  documentName String @map("document_name")
+  documentUrl  String @map("document_url")
+  information  String @db.Text
+
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime? @default(now()) @map("updated_at")
+
+  partnerProfile PartnerProfile @relation(fields: [partnerProfileId], references: [id])
+
+  @@map("legalities")
+}
+
+model Event {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  title         String    @db.VarChar(100)
+  slug          String    @db.VarChar(100)
+  type          EventType @default(OPEN)
+  description   String    @db.Text
+  requirement   String    @map("terms_and_conditions") @db.Text
+  contactPerson String    @map("contact_person") @db.VarChar(15)
+
+  maxApplicant  Int? @map("max_applicant")
+  acceptedQuota Int? @map("accepted_quota")
+
+  startAt DateTime  @map("start_at")
+  endAt   DateTime? @map("end_at")
+
+  isPaid Boolean? @default(false) @map("is_paid")
+  price  Decimal? @default(0) @db.Decimal(12, 2)
+
+  province  String   @db.VarChar(50)
+  regency   String   @db.VarChar(50)
+  address   String?
+  gmaps     String?
+  latitude  Decimal? @db.Decimal(10, 8)
+  longitude Decimal? @db.Decimal(11, 8)
+
+  bannerUrl String    @map("banner_url")
+  isRelease Boolean   @default(false) @map("is_release")
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime? @default(now()) @map("updated_at")
+
+  user             User               @relation(fields: [userId], references: [id])
+  categories       Category[]
+  userSavedEvents  UserSavedEvent[]
+  participations   Participant[]
+  forms            Form[]
+  userEventBenefit UserEventBenefit[]
+
   @@index([title])
   @@map("events")
 }
 
 model Category {
-  id          Int       @id @default(autoincrement())  
+  id          String    @id @default(uuid()) @db.Uuid
   name        String    @unique @db.VarChar(40)
   description String?   @db.Text
   createdAt   DateTime? @map("created_at")
-  updatedAt   DateTime  @default(now()) @map("updated_at")
+  updatedAt   DateTime? @default(now()) @map("updated_at")
 
   events Event[]
 
@@ -135,11 +172,12 @@ model Category {
 }
 
 model UserSavedEvent {
-  id        Int       @id @default(autoincrement())  
-  userId    Int       @map("user_id")
-  eventId   Int       @map("event_id")
+  id      String @id @default(uuid()) @db.Uuid
+  userId  String @map("user_id") @db.Uuid
+  eventId String @map("event_id") @db.Uuid
+
   createdAt DateTime? @map("created_at")
-  updatedAt DateTime  @default(now()) @map("updated_at")
+  updatedAt DateTime? @default(now()) @map("updated_at")
 
   user  User  @relation(fields: [userId], references: [id])
   event Event @relation(fields: [eventId], references: [id])
@@ -147,60 +185,71 @@ model UserSavedEvent {
   @@map("user_saved_events")
 }
 
-model Comment {
-  id        Int       @id @default(autoincrement())  
-  userId    Int       @map("user_id")
-  eventId   Int       @map("event_id")
-  content   String    @db.Text
+model EventBenefit {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @db.VarChar(20)
+  icon        String  @db.VarChar(20)
+  description String?
+
   createdAt DateTime? @map("created_at")
-  updatedAt DateTime  @default(now()) @map("updated_at")
+  updatedAt DateTime? @default(now()) @map("updated_at")
 
-  user    User            @relation(fields: [userId], references: [id])
-  event   Event           @relation(fields: [eventId], references: [id])
-  reports CommentReport[]
-
-  @@map("comments")
+  @@map("event_benefits")
 }
 
-model CommentReport {
-  id         Int                 @id @default(autoincrement())  
-  commentId  Int                 @map("comment_id")
-  reportedBy Int                 @map("reported_by")
-  reason     String              @db.Text
-  status     CommentReportStatus @default(REVIEWED)
-  reviewedAt DateTime?           @map("reviewed_at")
-  createdAt  DateTime?           @map("created_at")
-  updatedAt  DateTime            @default(now()) @map("updated_at")
+model UserEventBenefit {
+  id      String  @id @default(uuid()) @db.Uuid
+  userId  String? @map("user_id") @db.Uuid
+  eventId String  @map("event_id") @db.Uuid
 
-  comment        Comment @relation(fields: [commentId], references: [id])
-  reportedByUser User    @relation(fields: [reportedBy], references: [id])
+  customIcon    String? @map("custom_icon") @db.VarChar(15)
+  customBenefit String? @map("custom_benefit") @db.VarChar(15)
 
-  @@map("comment_reports")
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime? @default(now()) @map("updated_at")
+
+  user  User? @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("user_event_benefits")
 }
 
-model Participation {
-  id                  Int                 @id @default(autoincrement())  
-  userId              Int                 @map("user_id")
-  eventId             Int                 @map("event_id")
-  participationStatus ParticipationStatus @default(REVIEWED) @map("participation_status")
-  completedAt         DateTime?           @map("completed_at")
-  createdAt           DateTime?           @map("created_at")
-  updatedAt           DateTime            @default(now()) @map("updated_at")
+model Participant {
+  id          String            @id @default(uuid()) @db.Uuid
+  userId      String            @map("user_id") @db.Uuid
+  eventId     String            @map("event_id") @db.Uuid
+  status      ParticipantStatus @default(REVIEWED)
+  completedAt DateTime?         @map("completed_at")
+  createdAt   DateTime?         @map("created_at")
+  updatedAt   DateTime?         @default(now()) @map("updated_at")
 
   user  User  @relation(fields: [userId], references: [id])
   event Event @relation(fields: [eventId], references: [id])
 
-  @@map("participations")
+  @@map("participants")
+}
+
+model Form {
+  id      String @id @default(uuid()) @db.Uuid
+  eventId String @map("event_id") @db.Uuid
+  content Json   @db.JsonB
+
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime? @default(now()) @map("updated_at")
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("forms")
 }
 
 model Notification {
-  id        Int               @id @default(autoincrement())  
-  userId    Int               @map("user_id")
+  id        String            @id @default(uuid()) @db.Uuid
+  userId    String            @map("user_id") @db.Uuid
   content   String            @db.Text
   type      NotificationTypes
   url       String?           @db.VarChar
   createdAt DateTime?         @map("created_at")
-  updatedAt DateTime          @default(now()) @map("updated_at")
+  updatedAt DateTime?         @default(now()) @map("updated_at")
   user      User              @relation(fields: [userId], references: [id])
 
   @@map("notifications")
@@ -213,7 +262,7 @@ enum LoginProviders {
 }
 
 enum Roles {
-  ADMIN  
+  ADMIN
   VOLUNTEER
   PARTNER
 }
@@ -238,17 +287,20 @@ enum CommentReportStatus {
   APPROVED
 }
 
-enum ParticipationStatus {
+enum ParticipantStatus {
   REVIEWED
-  JOINED
   ACCEPTED
-  COMPLETED
   REJECTED
-  FINISHED
 }
 
 enum PartnerStatus {
   REVIEWED
   ACCEPTED
   REJECTED
+  VERIFIED
+}
+
+enum EventType {
+  OPEN
+  LIMITED
 }
