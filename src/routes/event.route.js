@@ -1,3 +1,4 @@
+// routes/event.route.js
 import { Router } from 'express';
 import * as authMiddleware from '../middleware/auth.js';
 import * as eventController from '../controllers/event.controller.js';
@@ -8,34 +9,77 @@ import uploadMiddleware from '../utils/multer.js';
 export default (app) => {
   const router = Router();
 
-  app.use('/events', router);
+  app.use('/api/v1', router);
 
-  router.post(
-    '/',
+  // Public endpoints
+  router.get('/events', eventController.getAllEvents);
+  router.get('/events/:id', eventController.getEventById);
+
+  // Partner events management - Resource Oriented
+  router.get(
+    '/partners/:partnerId/events',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isAdminOrPartner,
-    uploadMiddleware,
-    eventValidation.validateEventCreate,
-    eventController.createEvent,
+    accessMiddleware.isPartner,
+    eventController.getPartnerEvents,
   );
 
-  router.put(
-    '/:id',
+  router.post(
+    '/partners/:partnerId/events',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isAdminOrPartner,
+    accessMiddleware.isPartner,
+    accessMiddleware.isOwnerOrAdmin('partnerId'),
+    accessMiddleware.checkPartnerStatus(['ACCEPTED', 'VERIFIED']),
+    accessMiddleware.checkEventQuota,
+    uploadMiddleware,
+    eventValidation.validateEventCreate,
+    eventController.createPartnerEvent,
+  );
+
+  router.get(
+    '/partners/:partnerId/events/:eventId',
+    authMiddleware.isAuthenticate,
+    accessMiddleware.isPartner,
+    eventController.getPartnerEventDetail,
+  );
+
+  router.patch(
+    '/partners/:partnerId/events/:eventId',
+    authMiddleware.isAuthenticate,
+    accessMiddleware.isPartner,
+    accessMiddleware.checkPartnerStatus(['ACCEPTED', 'VERIFIED']),
     uploadMiddleware,
     eventValidation.validateEventUpdate,
-    eventController.updateEvent,
+    eventController.updatePartnerEvent,
   );
 
   router.delete(
-    '/:id',
+    '/partners/:partnerId/events/:eventId',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isAdminOrPartner,
-    eventController.deleteEvent,
+    accessMiddleware.isPartner,
+    eventController.deletePartnerEvent,
   );
 
-  //public api
-  router.get('/', eventController.getAllEvents);
-  router.get('/:id', eventController.getEventById);
+  // Admin endpoints - untuk akses admin ke semua event
+  router.get(
+    '/admin/events',
+    authMiddleware.isAuthenticate,
+    accessMiddleware.isAdmin,
+    eventController.getAllEventsAdmin,
+  );
+
+  router.patch(
+    '/admin/events/:eventId',
+    authMiddleware.isAuthenticate,
+    accessMiddleware.isAdmin,
+    uploadMiddleware,
+    eventValidation.validateEventUpdate,
+    eventController.adminUpdateEvent,
+  );
+
+  router.delete(
+    '/admin/events/:eventId',
+    authMiddleware.isAuthenticate,
+    accessMiddleware.isAdmin,
+    eventController.adminDeleteEvent,
+  );
 };

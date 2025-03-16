@@ -1,6 +1,80 @@
 import prisma from '../configs/dbConfig.js';
 import { HttpError } from '../utils/error.js';
 
+//partner
+export const getPartnerEvents = async (params) => {
+  const {
+    userId,
+    name,
+    category,
+    start = 'desc',
+    end = 'desc',
+    publish,
+    page = 1,
+    limit = 10,
+  } = params;
+
+  const skip = (page - 1) * limit;
+
+  // Buat where clause
+  let whereClause = { userId };
+
+  if (name) {
+    whereClause.title = {
+      contains: name,
+      mode: 'insensitive',
+    };
+  }
+
+  if (category) {
+    whereClause.categories = {
+      some: {
+        name: {
+          contains: category,
+          mode: 'insensitive',
+        },
+      },
+    };
+  }
+
+  if (publish !== undefined) {
+    whereClause.isRelease = publish;
+  }
+
+  // Hitung total
+  const total = await prisma.event.count({
+    where: whereClause,
+  });
+
+  // Ambil data
+  const events = await prisma.event.findMany({
+    where: whereClause,
+    include: {
+      categories: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+    skip,
+    take: limit,
+    orderBy: [{ createdAt: start }, { updatedAt: end }],
+  });
+
+  return {
+    events,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+
 export const getAllEvents = async (query = {}) => {
   const {
     page = 1,
