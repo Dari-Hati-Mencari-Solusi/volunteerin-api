@@ -79,64 +79,19 @@ export const getAllPartnerProfiles = async (query = {}) => {
 
 export const getPartnerProfileById = async (id) => {
   return prisma.partnerProfile.findUnique({
-    where: { id: parseInt(id) },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-        },
-      },
-      responsiblePersons: true,
-    },
+    where: { id },
   });
 };
 
 export const getPartnerProfileByUserId = async (userId) => {
   return prisma.partnerProfile.findUnique({
     where: { userId },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-        },
-      },
-      responsiblePersons: true,
-    },
   });
 };
 
-export const createPartnerProfile = async (partnerProfileData) => {
-  try {
-    const partnerProfile = await prisma.partnerProfile.create({
-      data: partnerProfileData,
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-          },
-        },
-        responsiblePersons: true,
-      },
-    });
-    return partnerProfile;
-  } catch (error) {
-    if (error.code === 'P2002') {
-      throw new HttpError(
-        'User sudah memiliki profile partner yang terdaftar',
-        400,
-      );
-    }
-    throw error;
-  }
+export const createPartnerProfile = async (data) => {
+  const partnerProfile = await prisma.partnerProfile.create({ data });
+  return partnerProfile;
 };
 
 export const updatePartnerProfile = async (id, partnerProfileData) => {
@@ -165,7 +120,6 @@ export const updatePartnerProfile = async (id, partnerProfileData) => {
     if (error.code === 'P2025') {
       throw new HttpError('Profile partner tidak ditemukan', 404);
     }
-    console.error('Error updating partner profile:', error);
     throw error;
   }
 };

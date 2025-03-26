@@ -1,40 +1,34 @@
 import Joi from 'joi';
 import { generateJoiError } from '../../utils/joi.js';
 
+const OrganizationType = Object.freeze({
+  COMMUNITY: 'COMMUNITY',
+  GOVERNMENT: 'GOVERNMENT',
+  CORPORATE: 'CORPORATE',
+  INDIVIDUAL: 'INDIVIDUAL',
+});
+
 const partnerProfileSchema = Joi.object({
   organizationType: Joi.string()
-    .valid('PERSONAL', 'ORGANIZATION', 'COMPANY')
+    .valid(...Object.values(OrganizationType))
     .required(),
   organizationAddress: Joi.string().required(),
   instagram: Joi.string().max(50).required(),
-  information: Joi.string().allow('', null),
-  eventQuota: Joi.number().integer().min(1),
-  status: Joi.string().valid('REVIEWED', 'APPROVED', 'REJECTED'),
-}).options({
-  stripUnknown: true,
-  abortEarly: false,
 });
 
 export const validatePartnerProfileCreate = async (req, res, next) => {
   try {
-    const { error, value } = partnerProfileSchema.validate(req.body, {
+    await partnerProfileSchema.validateAsync(req.body, {
       abortEarly: false,
+      stripUnknown: true,
     });
 
-    if (error) {
-      return generateJoiError(error);
-    }
-
-    // Hapus field yang tidak boleh diubah oleh partner
-    if (req.user.role !== 'ADMIN') {
-      delete value.eventQuota;
-      delete value.status;
-    }
-
-    req.validatedPartnerData = value;
     next();
   } catch (error) {
-    next(error);
+    return res.status(400).json({
+      message: 'Terjadi kesalahan',
+      errors: generateJoiError(error),
+    });
   }
 };
 

@@ -3,7 +3,7 @@ import * as authMiddleware from '../middleware/auth.js';
 import * as eventController from '../controllers/event.controller.js';
 import * as accessMiddleware from '../middleware/access.js';
 import * as eventValidation from '../middleware/validations/event.js';
-import uploadMiddleware from '../utils/multer.js';
+import * as uploadMiddleware from '../middleware/upload.js';
 
 export default (app) => {
   const router = Router();
@@ -14,7 +14,12 @@ export default (app) => {
     '/',
     authMiddleware.isAuthenticate,
     accessMiddleware.isAdminOrPartner,
-    uploadMiddleware,
+    uploadMiddleware.uploadSingle(
+      'banner',
+      '1MB',
+      ['image/png', 'image/jpg', 'image/jpeg'],
+      'File yang diunggah harus dalam format PNG, JPG, atau JPEG.',
+    ),
     eventValidation.validateEventCreate,
     eventController.createEvent,
   );
@@ -23,7 +28,12 @@ export default (app) => {
     '/:id',
     authMiddleware.isAuthenticate,
     accessMiddleware.isAdminOrPartner,
-    uploadMiddleware,
+    uploadMiddleware.uploadSingle(
+      'banner',
+      '1MB',
+      ['image/png', 'image/jpg', 'image/jpeg'],
+      'File yang diunggah harus dalam format PNG, JPG, atau JPEG.',
+    ),
     eventValidation.validateEventUpdate,
     eventController.updateEvent,
   );
