@@ -1,5 +1,6 @@
 import imagekit from '../configs/imageKitConfig.js';
 import { HttpError } from './error.js';
+import { v4 as uuidv4 } from 'uuid';
 
 export const uploadToImageKit = async (file) => {
   try {
@@ -7,17 +8,15 @@ export const uploadToImageKit = async (file) => {
       throw new HttpError('File tidak ditemukan!', 400);
     }
 
-    const base64 = file.buffer.toString('base64');
-
     const uploadResponse = await imagekit.upload({
-      file: base64,
-      fileName: `${Date.now()}-${file.originalname}`,
+      file: file.buffer,
+      fileName: `${Date.now()}-${uuidv4()}`,
     });
 
-    return uploadResponse.url;
-  } catch (err) {
-    throw err instanceof HttpError
-      ? err
-      : new HttpError('Gagal mengunggah gambar!', 500);
+    return uploadResponse;
+  } catch (error) {
+    throw error instanceof HttpError
+      ? error
+      : new HttpError('Gagal mengunggah gambar', 500);
   }
 };
