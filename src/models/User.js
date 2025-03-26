@@ -55,3 +55,10 @@ export const logUserLogin = async (id) => {
     },
   });
 };
+
+export const updateUserById = async (id, data) => {
+  return prisma.user.update({
+    where: { id },
+    data,
+  });
+};
