@@ -57,7 +57,7 @@ model PartnerProfile {
   organizationType    OrganizationTypes @map("organization_type")
   organizationAddress String            @map("organization_address") @db.Text
   instagram           String            @db.VarChar(50)
-  eventQuota          Int               @default(1) @map("event_quota")
+  eventQuota          Int?               @default(1) @map("event_quota")
   status              PartnerStatus     @default(REVIEWED)
   information         String?           @db.Text
   createdAt           DateTime?         @map("created_at")
