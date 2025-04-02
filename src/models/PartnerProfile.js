@@ -77,6 +77,10 @@ export const getAllPartnerProfiles = async (query = {}) => {
   };
 };
 
+export const getPartnerProfiles = async () => {
+  return prisma.partnerProfile.findMany();
+}
+
 export const getPartnerProfileById = async (id) => {
   return prisma.partnerProfile.findUnique({
     where: { id },
