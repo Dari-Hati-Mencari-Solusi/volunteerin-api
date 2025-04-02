@@ -1,5 +1,9 @@
 import prisma from '../configs/dbConfig.js';
 
+export const getUsers = async () => {
+  return prisma.user.findMany();
+}
+
 export const getUserById = async (id) => {
   return prisma.user.findUnique({ where: { id } });
 };

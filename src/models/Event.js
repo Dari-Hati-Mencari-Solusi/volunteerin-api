@@ -118,7 +118,7 @@ export const getEventById = async (id) => {
   });
 };
 
-export const createEvent = async (eventData) => {
+export const createEventWithCategories = async (eventData) => {
   try {
     const event = await prisma.event.create({
       data: {
@@ -142,6 +142,14 @@ export const createEvent = async (eventData) => {
     throw error;
   }
 };
+
+export const createEvent = async (data) => {
+ return prisma.event.create({ data }); 
+}
+
+export const createEvents = async (data) => {
+ return prisma.event.createMany({ data }); 
+}
 
 export const updateEvent = async (id, eventData) => {
   try {

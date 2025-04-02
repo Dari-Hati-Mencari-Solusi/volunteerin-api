@@ -77,7 +77,7 @@ export const createEvent = async (req, res, next) => {
       bannerUrl: imageUrl,
     };
 
-    const event = await eventModel.createEvent(eventData);
+    const event = await eventModel.createEventWithCategories(eventData);
 
     res.status(201).json({
       message: 'Event berhasil dibuat',

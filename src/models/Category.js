@@ -40,6 +40,10 @@ export const getAllCategories = async (query = {}) => {
   };
 };
 
+export const getCategories = async () => {
+  return prisma.category.findMany();
+}
+
 export const getCategoryById = async (id) => {
   return prisma.category.findUnique({
     where: { id },
@@ -51,6 +55,12 @@ export const createCategory = async (categoryData) => {
     data: categoryData,
   });
 };
+
+export const createCategories = async (data) => {
+  return prisma.category.createMany({
+    data
+  });
+}
 
 export const updateCategory = async (id, categoryData) => {
   return prisma.category.update({
