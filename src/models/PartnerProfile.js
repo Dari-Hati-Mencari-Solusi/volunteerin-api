@@ -98,35 +98,12 @@ export const createPartnerProfile = async (data) => {
   return partnerProfile;
 };
 
-export const updatePartnerProfile = async (id, partnerProfileData) => {
-  try {
-    const partnerProfile = await prisma.partnerProfile.update({
-      where: { id },
-      data: {
-        ...partnerProfileData,
-        updatedAt: new Date(),
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-          },
-        },
-        responsiblePersons: true,
-      },
-    });
-
-    return partnerProfile;
-  } catch (error) {
-    if (error.code === 'P2025') {
-      throw new HttpError('Profile partner tidak ditemukan', 404);
-    }
-    throw error;
-  }
-};
+export const updatePartnerProfileByUserId = async (userId, data) => {
+  return prisma.partnerProfile.update({
+    where: { userId },
+    data
+  });
+}
 
 export const deletePartnerProfile = async (id) => {
   try {

@@ -20,3 +20,11 @@ export const uploadToImageKit = async (file) => {
       : new HttpError('Gagal mengunggah gambar', 500);
   }
 };
+
+export const deleteImageFromImagekit = async (fileId) => {
+  try {
+    await imagekit.deleteFile(fileId);
+  } catch(error) {
+    throw new HttpError('Gagal mengubah gambar!', 500)
+  }
+} 
