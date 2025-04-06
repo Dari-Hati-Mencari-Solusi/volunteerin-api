@@ -15,6 +15,7 @@ model User {
   password      String?        @db.VarChar
   socialId      String?        @map("social_id") @db.VarChar
   role          Roles          @default(VOLUNTEER)
+  avatarImageId String?        @map("avatar_image_id")
   avatarUrl     String?        @map("avatar_url") @db.VarChar
   loginProvider LoginProviders @default(LOCAL) @map("login_provider")
   isSubscribed  Boolean        @default(false) @map("is_subcribed")
@@ -57,7 +58,7 @@ model PartnerProfile {
   organizationType    OrganizationTypes @map("organization_type")
   organizationAddress String            @map("organization_address") @db.Text
   instagram           String            @db.VarChar(50)
-  eventQuota          Int?               @default(1) @map("event_quota")
+  eventQuota          Int?              @default(1) @map("event_quota")
   status              PartnerStatus     @default(REVIEWED)
   information         String?           @db.Text
   createdAt           DateTime?         @map("created_at")
@@ -92,6 +93,7 @@ model ResponsiblePerson {
   fullName         String    @map("full_name") @db.VarChar(125)
   phoneNumber      String    @map("phone_number") @db.VarChar(20)
   position         String    @db.VarChar(50)
+  ktpImageId       String?   @map("ktp_image_id")
   ktpUrl           String    @map("ktp_url") @db.VarChar
   createdAt        DateTime? @map("created_at")
   updatedAt        DateTime? @default(now()) @map("updated_at")
@@ -105,9 +107,10 @@ model Legality {
   id               String @id @default(uuid()) @db.Uuid
   partnerProfileId String @unique @map("partner_profile_id") @db.Uuid
 
-  documentName String @map("document_name")
-  documentUrl  String @map("document_url")
-  information  String @db.Text
+  documentName    String  @map("document_name")
+  documentImageId String? @map("document_image_id")
+  documentUrl     String  @map("document_url")
+  information     String  @db.Text
 
   createdAt DateTime? @map("created_at")
   updatedAt DateTime? @default(now()) @map("updated_at")
@@ -143,10 +146,11 @@ model Event {
   latitude  Decimal? @db.Decimal(10, 8)
   longitude Decimal? @db.Decimal(11, 8)
 
-  bannerUrl String    @map("banner_url")
-  isRelease Boolean   @default(false) @map("is_release")
-  createdAt DateTime? @map("created_at")
-  updatedAt DateTime? @default(now()) @map("updated_at")
+  bannerImageId String?   @map("banner_image_id")
+  bannerUrl     String    @map("banner_url")
+  isRelease     Boolean   @default(false) @map("is_release")
+  createdAt     DateTime? @map("created_at")
+  updatedAt     DateTime? @default(now()) @map("updated_at")
 
   user             User               @relation(fields: [userId], references: [id])
   categories       Category[]
