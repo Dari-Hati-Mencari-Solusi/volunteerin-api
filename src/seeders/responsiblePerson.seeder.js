@@ -1,5 +1,5 @@
 import moment from "moment";
-import { createLegality } from "../models/Legality.js";
+import { createResponsiblePerson } from "../models/ResponsiblePerson.js";
 import { getPartnerProfiles } from "../models/PartnerProfile.js";
 import { fakerID } from "./seederConfig.js";
 
@@ -7,7 +7,7 @@ export default async () => {
   
   const partnerProfiles = await getPartnerProfiles();
 
-  const legality = {
+  const responsiblePerson = {
     partnerProfileId: partnerProfiles[0].id,
     nik: '127362473647364',
     fullName: fakerID.person.fullName(),
@@ -17,6 +17,6 @@ export default async () => {
     createdAt: moment().toISOString()
   }
 
-  await createLegality(legality);
+  await createResponsiblePerson(responsiblePerson);
   console.log('Legality successfully seeded.');
 }
