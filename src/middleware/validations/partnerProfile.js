@@ -34,17 +34,16 @@ export const validatePartnerProfileCreate = async (req, res, next) => {
 
 export const validatePartnerProfileUpdate = async (req, res, next) => {
   try {
-    const { error, value } = partnerProfileSchema.validate(req.body, {
+    await partnerProfileSchema.validateAsync(req.body, {
       abortEarly: false,
+      stripUnknown: true,
     });
 
-    if (error) {
-      return generateJoiError(error);
-    }
-
-    req.validatedPartnerData = value;
     next();
   } catch (error) {
-    next(error);
+    return res.status(400).json({
+      message: 'Terjadi kesalahan',
+      errors: generateJoiError(error),
+    });
   }
 };

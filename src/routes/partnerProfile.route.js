@@ -9,7 +9,7 @@ import * as partnerProfileValidation from '../middleware/validations/partnerProf
 export default (app) => {
   const router = Router();
 
-  app.use('/partners', router);
+  app.use('/partners/me', router);
 
   router.post(
     '/profile',
@@ -24,5 +24,27 @@ export default (app) => {
     imageMiddleware.maxDimensionOfFile(500, 500),
     partnerProfileValidation.validatePartnerProfileCreate,
     partnerProfileController.createPartnerProfile,
+  );
+
+  router.get(
+    '/profile',
+    authMiddleware.isAuthenticate,
+    accessMiddleware.isPartner,
+    partnerProfileController.getPartnerProfile
+  );
+
+  router.put(
+    '/profile',
+    authMiddleware.isAuthenticate,
+    accessMiddleware.isPartner,
+    uploadMiddleware.uploadSingle(
+      'logo',
+      '200KB',
+      ['image/png', 'image/jpg', 'image/jpeg'],
+      'File yang diunggah harus dalam format PNG, JPG, atau JPEG.',
+    ),
+    imageMiddleware.maxDimensionOfFile(500, 500),
+    partnerProfileValidation.validatePartnerProfileUpdate,
+    partnerProfileController.updatePartnerProfile
   );
 };

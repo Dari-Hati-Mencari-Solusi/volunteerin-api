@@ -4,6 +4,10 @@ import { HttpError } from '../utils/error.js';
 export const maxDimensionOfFile = (maxWidth, maxHeight) => {
   return async (req, _res, next) => {
     try {
+      if (!req.file) {
+        return next();
+      }
+
       const image = sharp(req.file.buffer);
       const { width, height } = await image.metadata();
 
