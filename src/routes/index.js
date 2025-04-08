@@ -3,6 +3,7 @@ import auth from './auth.route.js';
 import events from './event.route.js';
 import partners from './partnerProfile.route.js';
 import categories from './category.route.js';
+import responsiblePerson from "./responsiblePerson.route.js"
 
 export default (app) => {
   const router = Router();
@@ -13,4 +14,5 @@ export default (app) => {
   events(router);
   partners(router);
   categories(router);
+  responsiblePerson(router);
 };
