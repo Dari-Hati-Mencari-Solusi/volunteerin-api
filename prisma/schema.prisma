@@ -110,7 +110,7 @@ model Legality {
   documentName    String  @map("document_name")
   documentImageId String? @map("document_image_id")
   documentUrl     String  @map("document_url")
-  information     String  @db.Text
+  information     String?  @db.Text
 
   createdAt DateTime? @map("created_at")
   updatedAt DateTime? @default(now()) @map("updated_at")

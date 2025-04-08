@@ -1,11 +1,11 @@
 import { Router } from "express";
-import * as authMiddleware from '../middleware/auth.js';
-import * as accessMiddleware from '../middleware/access.js';
-import * as responsiblePersonValidation from "../middleware/validations/responsiblePerson.js"
-import * as uploadMiddleware from "../middleware/upload.js";
-import * as partnerProfileMiddleware from "../middleware/partnerProfile.js";
-import * as responsiblePersonMiddleware from "../middleware/responsiblePerson.js";
-import * as responsiblePersonController from "../controllers/partner/responsiblePerson.controller.js"
+import * as authMiddleware from '../../middleware/auth.js';
+import * as accessMiddleware from '../../middleware/access.js';
+import * as responsiblePersonValidation from "../../middleware/validations/responsiblePerson.js"
+import * as uploadMiddleware from "../../middleware/upload.js";
+import * as partnerProfileMiddleware from "../../middleware/partnerProfile.js";
+import * as responsiblePersonMiddleware from "../../middleware/responsiblePerson.js";
+import * as responsiblePersonController from "../../controllers/partner/responsiblePerson.controller.js"
 
 export default (app) => {
   const router = Router();
