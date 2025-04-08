@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import * as authMiddleware from '../middleware/auth.js';
-import * as accessMiddleware from '../middleware/access.js';
-import * as uploadMiddleware from '../middleware/upload.js';
-import * as imageMiddleware from '../middleware/image.js';
-import * as partnerProfileController from '../controllers/partner/partnerProfile.controller.js';
-import * as partnerProfileValidation from '../middleware/validations/partnerProfile.js';
-import * as partnerProfileMiddleware from '../middleware/partnerProfile.js';
+import * as authMiddleware from '../../middleware/auth.js';
+import * as accessMiddleware from '../../middleware/access.js';
+import * as uploadMiddleware from '../../middleware/upload.js';
+import * as imageMiddleware from '../../middleware/image.js';
+import * as partnerProfileController from '../../controllers/partner/partnerProfile.controller.js';
+import * as partnerProfileValidation from '../../middleware/validations/partnerProfile.js';
+import * as partnerProfileMiddleware from '../../middleware/partnerProfile.js';
 
 export default (app) => {
   const router = Router();
