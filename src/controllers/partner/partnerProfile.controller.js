@@ -1,32 +1,20 @@
 import * as partnerProfileModel from '../../models/PartnerProfile.js';
 import * as userModel from '../../models/User.js';
-import { HttpError } from '../../utils/error.js';
 import { deleteImageFromImagekit, uploadToImageKit } from '../../utils/imagekit.js';
 
 export const createPartnerProfile = async (req, res, next) => {
   try {
     const { id: userId } = req.user;
 
-    let partnerProfile =
-      await partnerProfileModel.getPartnerProfileByUserId(userId);
-
-    if (partnerProfile) {
-      throw new HttpError('Maaf, Anda sudah memiliki profile partner!', 400);
-    }
-
-    const { organizationType, organizationAddress, instagram } = req.body;
-
     const uploadResponse = await uploadToImageKit(req.file);
     
     const partnerProfileData = {
       userId,
-      organizationType,
-      organizationAddress,
-      instagram,
+      ...req.body,
       createdAt: new Date(),
     };
 
-    partnerProfile =
+    let partnerProfile =
       await partnerProfileModel.createPartnerProfile(partnerProfileData);
     const userAfterUpdate = await userModel.updateUserById(userId, {
       avatarImageId: uploadResponse.fileId,
@@ -79,13 +67,8 @@ export const updatePartnerProfile = async (req, res, next) => {
       });
     }
 
-    const { organizationType, organizationAddress, instagram } = req.body;
-
     const dataProfileWillUpdate = {
-      organizationType,
-      organizationAddress,
-      instagram,
-      updatedAt: new Date()
+      ...req.body
     }
 
     const partnerProfileAfterUpdate = await partnerProfileModel.updatePartnerProfileByUserId(userId, dataProfileWillUpdate);
