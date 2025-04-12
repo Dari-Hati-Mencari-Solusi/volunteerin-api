@@ -5,67 +5,64 @@ export const getAllEvents = async (query = {}) => {
   const {
     page = 1,
     limit = 10,
-    search = '',
-    location = '',
-    categoryId,
-    startDate,
-    endDate,
-    latitude,
-    longitude,
-    radius = 10,
+    name = '',
+    category = '',
+    start,
+    end,
+    publish,
   } = query;
 
   const skip = (page - 1) * limit;
 
-  let whereClause = {
-    AND: [
-      {
-        title: {
-          contains: search,
-          mode: 'insensitive',
-        },
-      },
-    ],
-  };
+  let whereClause = {};
 
-  if (location) {
-    whereClause.AND.push({
-      location: {
-        contains: location,
+  if (name) {
+    whereClause = {
+      ...whereClause,
+      title: {
+        contains: name,
         mode: 'insensitive',
       },
-    });
+    };
   }
 
-  if (categoryId) {
-    whereClause.AND.push({
+  if (category) {
+    whereClause = {
+      ...whereClause,
       categories: {
         some: {
-          id: parseInt(categoryId),
+          name: {
+            contains: category,
+            mode: 'insensitive',
+          },
         },
       },
-    });
+    };
   }
 
-  if (startDate || endDate) {
-    const dateFilter = {};
-    if (startDate) dateFilter.gte = new Date(startDate);
-    if (endDate) dateFilter.lte = new Date(endDate);
-    whereClause.AND.push({ startAt: dateFilter });
+  if (start) {
+    whereClause = {
+      ...whereClause,
+      startAt: {
+        gte: new Date(start),
+      },
+    };
   }
 
-  if (latitude && longitude) {
-    const latDegree = radius / 111.12;
-    const lonDegree = radius / (111.12 * Math.cos((latitude * Math.PI) / 180));
+  if (end) {
+    whereClause = {
+      ...whereClause,
+      endAt: {
+        lte: new Date(end),
+      },
+    };
+  }
 
-    whereClause.AND.push({
-      AND: [
-        { latitude: { gte: Number(latitude) - latDegree } },
-        { latitude: { lte: Number(latitude) + latDegree } },
-        { longitude: { gte: Number(longitude) - lonDegree } },
-        { longitude: { lte: Number(longitude) + lonDegree } },
-      ],
-    });
+  if (publish !== undefined) {
+    whereClause = {
+      ...whereClause,
+      isRelease: publish === '1',
+    };
   }
 
   const total = await prisma.event.count({
@@ -75,12 +72,116 @@ export const getAllEvents = async (query = {}) => {
   const events = await prisma.event.findMany({
     where: whereClause,
     include: {
-      categories: true,
+      categories: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       user: {
         select: {
           id: true,
           name: true,
           email: true,
+          role: true,
+        },
+      },
+    },
+    skip,
+    take: parseInt(limit),
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  return {
+    events,
+    pagination: {
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+
+export const getEventsByUserId = async (userId, query = {}) => {
+  const {
+    page = 1,
+    limit = 10,
+    name = '',
+    category = '',
+    start,
+    end,
+    publish,
+  } = query;
+
+  const skip = (page - 1) * limit;
+
+  let whereClause = {
+    userId,
+  };
+
+  if (name) {
+    whereClause = {
+      ...whereClause,
+      title: {
+        contains: name,
+        mode: 'insensitive',
+      },
+    };
+  }
+
+  if (category) {
+    whereClause = {
+      ...whereClause,
+      categories: {
+        some: {
+          name: {
+            contains: category,
+            mode: 'insensitive',
+          },
+        },
+      },
+    };
+  }
+
+  if (start) {
+    whereClause = {
+      ...whereClause,
+      startAt: {
+        gte: new Date(start),
+      },
+    };
+  }
+
+  if (end) {
+    whereClause = {
+      ...whereClause,
+      endAt: {
+        lte: new Date(end),
+      },
+    };
+  }
+
+  if (publish !== undefined) {
+    whereClause = {
+      ...whereClause,
+      isRelease: publish === '1',
+    };
+  }
+
+  const total = await prisma.event.count({
+    where: whereClause,
+  });
+
+  const events = await prisma.event.findMany({
+    where: whereClause,
+    include: {
+      categories: {
+        select: {
+          id: true,
+          name: true,
         },
       },
     },
@@ -104,93 +205,53 @@ export const getAllEvents = async (query = {}) => {
 
 export const getEventById = async (id) => {
   return prisma.event.findUnique({
-    where: { id: parseInt(id) },
+    where: { id },
     include: {
       categories: true,
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
     },
   });
 };
 
-export const createEventWithCategories = async (eventData) => {
-  try {
-    const event = await prisma.event.create({
-      data: {
-        ...eventData,
-        categories: {
-          create: eventData.categories.map((categoryId) => ({
-            categoryId: categoryId,
-          })),
-        },
+export const createEvent = async (data) => {
+  const event = await prisma.event.create({
+    data: {
+      ...data,
+      categories: {
+        connect: data.categoryIds?.map((id) => ({ id })) || [],
       },
-      include: {
-        categories: true,
-        user: true,
-      },
-    });
-    return event;
-  } catch (error) {
-    if (error.code === 'P2002') {
-      throw new HttpError('User sudah memiliki event yang terdaftar', 400);
-    }
-    throw error;
-  }
+    },
+    include: {
+      categories: true,
+    },
+  });
+  return event;
 };
 
-export const createEvent = async (data) => {
- return prisma.event.create({ data }); 
-}
+export const updateEventById = async (id, data) => {
+  const categoryIds = data.categoryIds;
+  delete data.categoryIds;
 
-export const createEvents = async (data) => {
- return prisma.event.createMany({ data }); 
-}
+  let updateData = { ...data };
 
-export const updateEvent = async (id, eventData) => {
-  try {
-    const event = await prisma.event.update({
+  if (categoryIds && categoryIds.length > 0) {
+    const event = await prisma.event.findUnique({
       where: { id },
-      data: {
-        title: eventData.title,
-        description: eventData.description,
-        startAt: eventData.startAt,
-        endAt: eventData.endAt,
-        termsAndConditions: eventData.termsAndConditions,
-        contactPerson: eventData.contactPerson,
-        location: eventData.location,
-        latitude: eventData.latitude,
-        longitude: eventData.longitude,
-        bannerUrl: eventData.bannerUrl,
-        isRelease: eventData.isRelease,
-        categories: {
-          set: eventData.categories.map((categoryId) => ({ id: categoryId })),
-        },
-      },
-      include: {
-        categories: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
+      include: { categories: true },
     });
 
-    return event;
-  } catch (error) {
-    if (error.code === 'P2025') {
-      throw new HttpError('Event tidak ditemukan', 404);
-    }
-    console.error('Error updating event:', error);
-    throw error;
+    updateData.categories = {
+      disconnect: event.categories.map((cat) => ({ id: cat.id })),
+      connect: categoryIds.map((catId) => ({ id: catId })),
+    };
   }
+
+  return prisma.event.update({
+    where: { id },
+    data: updateData,
+    include: {
+      categories: true,
+    },
+  });
 };
 
 export const deleteEvent = async (id) => {

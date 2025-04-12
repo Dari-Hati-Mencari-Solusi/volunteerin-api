@@ -1,96 +1,67 @@
 import Joi from 'joi';
 import { generateJoiError } from '../../utils/joi.js';
-import { HttpError } from '../../utils/error.js';
+
+const EventType = Object.freeze({
+  OPEN: 'OPEN',
+  INVITE: 'INVITE',
+});
 
 const eventSchema = Joi.object({
-  title: Joi.string().required(),
+  title: Joi.string().max(100).required(),
+  type: Joi.string()
+    .valid(...Object.values(EventType))
+    .default('OPEN'),
   description: Joi.string().required(),
-  startAt: Joi.date().required(),
-  endAt: Joi.date().greater(Joi.ref('startAt')),
-  termsAndConditions: Joi.string().allow(''),
-  contactPerson: Joi.string().required(),
-  location: Joi.string().required(),
-  latitude: Joi.number().required(),
-  longitude: Joi.number().required(),
-  categories: Joi.alternatives()
-    .try(Joi.array().items(Joi.number()).min(1), Joi.string())
-    .required(),
+  requirement: Joi.string().required(),
+  contactPerson: Joi.string().max(15).required(),
+  maxApplicant: Joi.number().integer().allow(null),
+  acceptedQuota: Joi.number().integer().allow(null),
+  startAt: Joi.date().iso().required(),
+  endAt: Joi.date().iso().allow(null),
+  isPaid: Joi.boolean().default(false),
+  price: Joi.when('isPaid', {
+    is: true,
+    then: Joi.number().precision(2).required(),
+    otherwise: Joi.number().precision(2).default(0),
+  }),
+  province: Joi.string().max(50).required(),
+  regency: Joi.string().max(50).required(),
+  address: Joi.string().allow(null, ''),
+  gmaps: Joi.string().allow(null, ''),
+  latitude: Joi.number().precision(8).allow(null),
+  longitude: Joi.number().precision(8).allow(null),
   isRelease: Joi.boolean().default(false),
-}).options({
-  stripUnknown: true,
-  abortEarly: false,
+  categoryIds: Joi.array().items(Joi.string().uuid()).min(1).required(),
 });
 
 export const validateEventCreate = async (req, res, next) => {
   try {
-    if (!req.file && !req.files) {
-      return res.status(400).json({
-        message: 'Banner event harus diunggah!',
-      });
-    }
-
-    const { error, value } = eventSchema.validate(req.body, {
+    await eventSchema.validateAsync(req.body, {
       abortEarly: false,
+      stripUnknown: true,
     });
-
-    if (error) {
-      return generateJoiError(error);
-    }
-
-    let categories = value.categories;
-    if (typeof categories === 'string') {
-      categories = categories.split(',').map(Number);
-    } else if (Array.isArray(categories)) {
-      categories = categories.map(Number);
-    } else {
-      throw new HttpError('Format categories tidak valid', 400);
-    }
-
-    req.validatedEventData = {
-      ...value,
-      startAt: new Date(value.startAt),
-      endAt: value.endAt ? new Date(value.endAt) : null,
-      latitude: parseFloat(value.latitude),
-      longitude: parseFloat(value.longitude),
-      categories: categories,
-    };
 
     next();
   } catch (error) {
-    next(error);
+    return res.status(400).json({
+      message: 'Terjadi kesalahan',
+      errors: generateJoiError(error),
+    });
   }
 };
 
 export const validateEventUpdate = async (req, res, next) => {
   try {
-    const { error, value } = eventSchema.validate(req.body, {
+    await eventSchema.validateAsync(req.body, {
       abortEarly: false,
+      stripUnknown: true,
     });
-
-    if (error) {
-      return generateJoiError(error);
-    }
-
-    let categories = value.categories;
-    if (typeof categories === 'string') {
-      categories = categories.split(',').map(Number);
-    } else if (Array.isArray(categories)) {
-      categories = categories.map(Number);
-    } else {
-      throw new HttpError('Format categories tidak valid', 400);
-    }
-
-    req.validatedEventData = {
-      ...value,
-      startAt: new Date(value.startAt),
-      endAt: value.endAt ? new Date(value.endAt) : null,
-      latitude: parseFloat(value.latitude),
-      longitude: parseFloat(value.longitude),
-      categories: categories,
-    };
 
     next();
   } catch (error) {
-    next(error);
+    return res.status(400).json({
+      message: 'Terjadi kesalahan',
+      errors: generateJoiError(error),
+    });
   }
 };
