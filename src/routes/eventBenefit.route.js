@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import * as authMiddleware from '../../middleware/auth.js';
-import * as accessMiddleware from '../../middleware/access.js';
-import * as eventBenefitController from '../../controllers/admin/eventBenefit.controller.js';
-import * as eventBenefitValidation from '../../middleware/validations/eventBenefit.js';
+import * as authMiddleware from '../middleware/auth.js';
+import * as accessMiddleware from '../middleware/access.js';
+import * as eventBenefitController from '../controllers/eventBenefit.controller.js';
+import * as eventBenefitValidation from '../middleware/validations/eventBenefit.js';
 
 export default (app) => {
   const router = Router();

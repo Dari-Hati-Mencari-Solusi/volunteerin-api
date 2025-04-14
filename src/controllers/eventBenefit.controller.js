@@ -1,4 +1,4 @@
-import * as eventBenefitModel from '../../models/EventBenefit.js';
+import * as eventBenefitModel from '../models/EventBenefit.js';
 
 export const createEventBenefit = async (req, res, next) => {
   try {
