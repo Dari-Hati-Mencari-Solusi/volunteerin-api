@@ -8,23 +8,82 @@ import { generateSlug } from '../../utils/stringManipulation.js';
 export const createEvent = async (req, res, next) => {
   try {
     const { id: userId } = req.user;
+    const { benefitIds, ...eventData } = req.body;
 
     const uploadResponse = await uploadToImageKit(req.file);
 
-    const eventData = {
+    const eventDataToCreate = {
       userId,
-      ...req.body,
-      slug: generateSlug(req.body.title),
+      ...eventData,
+      slug: generateSlug(eventData.title),
       bannerImageId: uploadResponse.fileId,
       bannerUrl: uploadResponse.thumbnailUrl,
       createdAt: new Date(),
     };
 
-    const event = await eventModel.createEvent(eventData);
+    let event = await eventModel.createEvent(eventDataToCreate);
+
+    // Tambahkan benefit ke event
+    if (benefitIds && benefitIds.length > 0) {
+      event = await eventModel.addEventBenefits(event.id, benefitIds);
+    }
 
     res.status(201).json({
       message: 'Event berhasil dibuat',
       data: event,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateEvent = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { benefitIds, ...eventData } = req.body;
+
+    let bannerData = {};
+    if (req.file) {
+      const event = await eventModel.getEventById(id);
+
+      if (event.bannerImageId) {
+        await deleteImageFromImagekit(event.bannerImageId);
+      }
+
+      const uploadResponse = await uploadToImageKit(req.file);
+      bannerData = {
+        bannerImageId: uploadResponse.fileId,
+        bannerUrl: uploadResponse.thumbnailUrl,
+      };
+    }
+
+    const dataEventWillUpdate = {
+      ...eventData,
+      ...bannerData,
+    };
+
+    if (dataEventWillUpdate.title) {
+      dataEventWillUpdate.slug = generateSlug(dataEventWillUpdate.title);
+    }
+
+    dataEventWillUpdate.updatedAt = new Date();
+
+    const eventAfterUpdate = await eventModel.updateEventById(
+      id,
+      dataEventWillUpdate,
+    );
+
+    // Update benefits jika ada
+    if (benefitIds && benefitIds.length > 0) {
+      await eventModel.updateEventBenefits(id, benefitIds);
+    }
+
+    // Get updated event with benefits
+    const eventWithBenefits = await eventModel.getEventById(id);
+
+    res.status(200).json({
+      message: 'Event berhasil diupdate',
+      data: eventWithBenefits,
     });
   } catch (error) {
     next(error);
@@ -61,51 +120,6 @@ export const getEvent = async (req, res, next) => {
     res.status(200).json({
       message: 'Berhasil mendapatkan data event',
       data: event,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const updateEvent = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const { id: userId } = req.user;
-
-    let bannerData = {};
-    if (req.file) {
-      const event = await eventModel.getEventById(id);
-
-      if (event.bannerImageId) {
-        await deleteImageFromImagekit(event.bannerImageId);
-      }
-
-      const uploadResponse = await uploadToImageKit(req.file);
-      bannerData = {
-        bannerImageId: uploadResponse.fileId,
-        bannerUrl: uploadResponse.thumbnailUrl,
-      };
-    }
-
-    const dataEventWillUpdate = {
-      ...req.body,
-      ...bannerData,
-    };
-
-    if (dataEventWillUpdate.title) {
-      dataEventWillUpdate.slug = generateSlug(dataEventWillUpdate.title);
-    }
-
-    dataEventWillUpdate.updatedAt = new Date();
-
-    const eventAfterUpdate = await eventModel.updateEventById(
-      id,
-      dataEventWillUpdate,
-    );
-
-    res.status(200).json({
-      message: 'Event berhasil diupdate',
-      data: eventAfterUpdate,
     });
   } catch (error) {
     next(error);

@@ -5,6 +5,7 @@ import partners from './partner/partnerProfile.route.js';
 import categories from './category.route.js';
 import responsiblePerson from './partner/responsiblePerson.route.js';
 import legality from './partner/legality.route.js';
+import eventBenefits from './eventBenefit.route.js';
 
 export default (app) => {
   const router = Router();
@@ -17,4 +18,5 @@ export default (app) => {
   categories(router);
   responsiblePerson(router);
   legality(router);
+  eventBenefits(router);
 };

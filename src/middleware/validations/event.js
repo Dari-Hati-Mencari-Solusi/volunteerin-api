@@ -32,6 +32,7 @@ const eventSchema = Joi.object({
   longitude: Joi.number().precision(8).allow(null),
   isRelease: Joi.boolean().default(false),
   categoryIds: Joi.array().items(Joi.string().uuid()).min(1).required(),
+  benefitIds: Joi.array().items(Joi.string().uuid()).min(1).required(),
 });
 
 export const validateEventCreate = async (req, res, next) => {

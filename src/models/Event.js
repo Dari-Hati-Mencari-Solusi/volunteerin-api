@@ -1,6 +1,50 @@
 import prisma from '../configs/dbConfig.js';
 import { HttpError } from '../utils/error.js';
 
+export const addEventBenefits = async (eventId, benefitIds) => {
+  const eventBenefitData = benefitIds.map((benefitId) => ({
+    eventId,
+    benefitId,
+  }));
+
+  await prisma.userEventBenefit.createMany({
+    data: eventBenefitData,
+  });
+
+  return prisma.event.findUnique({
+    where: { id: eventId },
+    include: {
+      categories: true,
+      userEventBenefit: {
+        include: {
+          eventBenefit: true,
+        },
+      },
+    },
+  });
+};
+
+export const updateEventBenefits = async (eventId, benefitIds) => {
+  // Hapus semua benefit yang ada terlebih dahulu
+  await prisma.userEventBenefit.deleteMany({
+    where: {
+      eventId,
+    },
+  });
+
+  // Tambahkan benefit baru
+  const eventBenefitData = benefitIds.map((benefitId) => ({
+    eventId,
+    benefitId,
+  }));
+
+  await prisma.userEventBenefit.createMany({
+    data: eventBenefitData,
+  });
+
+  return true;
+};
+
 export const getAllEvents = async (query = {}) => {
   const {
     page = 1,
@@ -184,6 +228,11 @@ export const getEventsByUserId = async (userId, query = {}) => {
           name: true,
         },
       },
+      userEventBenefit: {
+        include: {
+          eventBenefit: true,
+        },
+      },
     },
     skip,
     take: parseInt(limit),
@@ -208,6 +257,11 @@ export const getEventById = async (id) => {
     where: { id },
     include: {
       categories: true,
+      userEventBenefit: {
+        include: {
+          eventBenefit: true,
+        },
+      },
     },
   });
 };
