@@ -27,14 +27,14 @@ model User {
   createdAt   DateTime? @map("created_at")
   updatedAt   DateTime? @default(now()) @map("updated_at")
 
-  profile           UserProfile?
-  location          UserLocation?
-  partner           PartnerProfile?
-  events            Event[]
-  participations    Participant[]
-  notifications     Notification[]
-  bookmarkEvents    UserSavedEvent[]
-  userEventBenefits UserEventBenefit[]
+  profile        UserProfile?
+  location       UserLocation?
+  partner        PartnerProfile?
+  events         Event[]
+  participations Participant[]
+  notifications  Notification[]
+  bookmarkEvents UserSavedEvent[]
+  benefits       Benefit[]
 
   @@map("users")
 }
@@ -110,7 +110,7 @@ model Legality {
   documentName    String  @map("document_name")
   documentImageId String? @map("document_image_id")
   documentUrl     String  @map("document_url")
-  information     String?  @db.Text
+  information     String? @db.Text
 
   createdAt DateTime? @map("created_at")
   updatedAt DateTime? @default(now()) @map("updated_at")
@@ -152,12 +152,11 @@ model Event {
   createdAt     DateTime? @map("created_at")
   updatedAt     DateTime? @default(now()) @map("updated_at")
 
-  user             User               @relation(fields: [userId], references: [id])
-  categories       Category[]
-  userSavedEvents  UserSavedEvent[]
-  participations   Participant[]
-  forms            Form[]
-  userEventBenefit UserEventBenefit[]
+  user            User             @relation(fields: [userId], references: [id])
+  categories      Category[]
+  userSavedEvents UserSavedEvent[]
+  participations  Participant[]
+  forms           Form[]
 
   @@index([title])
   @@map("events")
@@ -189,8 +188,9 @@ model UserSavedEvent {
   @@map("user_saved_events")
 }
 
-model EventBenefit {
+model Benefit {
   id          String  @id @default(uuid()) @db.Uuid
+  userId      String  @map("user_id") @db.Uuid
   name        String  @db.VarChar(20)
   icon        String  @db.VarChar(20)
   description String?
@@ -198,24 +198,9 @@ model EventBenefit {
   createdAt DateTime? @map("created_at")
   updatedAt DateTime? @default(now()) @map("updated_at")
 
-  @@map("event_benefits")
-}
+  user User @relation(fields: [userId], references: [id])
 
-model UserEventBenefit {
-  id      String  @id @default(uuid()) @db.Uuid
-  userId  String? @map("user_id") @db.Uuid
-  eventId String  @map("event_id") @db.Uuid
-
-  customIcon    String? @map("custom_icon") @db.VarChar(15)
-  customBenefit String? @map("custom_benefit") @db.VarChar(15)
-
-  createdAt DateTime? @map("created_at")
-  updatedAt DateTime? @default(now()) @map("updated_at")
-
-  user  User? @relation(fields: [userId], references: [id])
-  event Event @relation(fields: [eventId], references: [id])
-
-  @@map("user_event_benefits")
+  @@map("benefits")
 }
 
 model Participant {
