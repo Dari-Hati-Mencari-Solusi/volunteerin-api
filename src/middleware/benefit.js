@@ -1,4 +1,4 @@
-import * as benefitModel from '../models/Benefit.js';
+import * as benefitModel from '../models/benefit.js';
 import { HttpError } from '../utils/error.js';
 
 export const ensureBenefitExists = async (req, _, next) => {

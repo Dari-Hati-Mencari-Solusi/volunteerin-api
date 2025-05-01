@@ -1,168 +1,260 @@
-import * as eventBenefitModel from '../models/eventBenefit.js';
-import { HttpError } from '../utils/error.js';
-import prisma from '../configs/dbConfig.js';
+// controllers/partner/event.controller.js
+import * as eventModel from '../models/Event.js';
+import * as eventBenefitModel from '../models/EventBenefit.js';
+import {
+  deleteImageFromImagekit,
+  uploadToImageKit,
+} from '../utils/imagekit.js';
+import { generateSlug } from '../utils/stringManipulation.js';
 
-export const getAllEventBenefits = async (req, res, next) => {
+export const createEvent = async (req, res, next) => {
   try {
-    const result = await eventBenefitModel.getAllEventBenefits(req.query);
+    const { id: userId } = req.user;
+    const { benefitIds, categoryIds, ...eventData } = req.body;
 
-    if (!result.eventBenefits.length) {
-      throw new HttpError('Tidak ada event benefit yang ditemukan', 404);
+    // Validasi bahwa benefitIds dan categoryIds ada
+    if (!benefitIds || benefitIds.length === 0) {
+      return res.status(400).json({
+        message: 'Manfaat event tidak boleh kosong',
+      });
     }
 
-    res.status(200).json({
-      message: 'Daftar event benefit berhasil diambil',
-      data: result.eventBenefits,
-      pagination: result.pagination,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getEventBenefitById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-
-    if (!id) {
-      throw new HttpError('ID event benefit tidak valid', 400);
+    if (!categoryIds || categoryIds.length === 0) {
+      return res.status(400).json({
+        message: 'Kategori tidak boleh kosong',
+      });
     }
 
-    const eventBenefit = await eventBenefitModel.getEventBenefitById(id);
-
-    if (!eventBenefit) {
-      throw new HttpError('Event benefit tidak ditemukan', 404);
+    // Upload banner image
+    let uploadResponse = null;
+    if (req.file) {
+      uploadResponse = await uploadToImageKit(req.file);
+    } else {
+      return res.status(400).json({
+        message: 'Banner event tidak boleh kosong',
+      });
     }
 
-    res.status(200).json({
-      message: 'Event benefit berhasil diambil',
-      data: eventBenefit,
+    // Konversi tipe data yang perlu dikonversi
+    const eventDataProcessed = {
+      ...eventData,
+      // Konversi nilai string numerik ke tipe data yang sesuai
+      maxApplicant: eventData.maxApplicant
+        ? parseInt(eventData.maxApplicant, 10)
+        : null,
+      acceptedQuota: eventData.acceptedQuota
+        ? parseInt(eventData.acceptedQuota, 10)
+        : null,
+      isPaid: eventData.isPaid === 'true' || eventData.isPaid === true,
+      isRelease: eventData.isRelease === 'true' || eventData.isRelease === true,
+      price: eventData.price ? parseFloat(eventData.price) : 0,
+      latitude: eventData.latitude ? parseFloat(eventData.latitude) : null,
+      longitude: eventData.longitude ? parseFloat(eventData.longitude) : null,
+    };
+
+    // Prepare event data
+    const eventDataToCreate = {
+      userId,
+      ...eventDataProcessed,
+      slug: generateSlug(eventDataProcessed.title),
+      bannerImageId: uploadResponse.fileId,
+      bannerUrl: uploadResponse.thumbnailUrl,
+      createdAt: new Date(),
+    };
+
+    // Create event first
+    let event = await eventModel.createEvent({
+      ...eventDataToCreate,
+      categoryIds: categoryIds,
     });
-  } catch (error) {
-    next(error);
-  }
-};
 
-export const createEventBenefit = async (req, res, next) => {
-  try {
-    const { eventId, benefitId } = req.body;
-
-    // Validasi event
-    const existingEvent = await prisma.event.findUnique({
-      where: { id: eventId },
-    });
-
-    if (!existingEvent) {
-      throw new HttpError('Event tidak ditemukan', 404);
+    // Kemudian tambahkan relasi dengan benefits menggunakan tabel pivot event_benefits
+    try {
+      if (benefitIds && benefitIds.length > 0) {
+        // Gunakan method batch untuk tambah benefits
+        await eventBenefitModel.createEventBenefits(event.id, benefitIds);
+      }
+    } catch (error) {
+      console.error('Error creating event benefits:', error);
     }
 
-    // Validasi benefit
-    const existingBenefit = await prisma.benefit.findUnique({
-      where: { id: benefitId },
-    });
-
-    if (!existingBenefit) {
-      throw new HttpError('Benefit tidak ditemukan', 404);
-    }
-
-    const eventBenefit = await eventBenefitModel.createEventBenefit({
-      eventId,
-      benefitId,
-    });
+    // Ambil event lengkap dengan semua relasi
+    const eventWithBenefits = await eventModel.getEventById(event.id);
 
     res.status(201).json({
-      message: 'Event benefit berhasil dibuat',
-      data: eventBenefit,
+      message: 'Event berhasil dibuat',
+      data: eventWithBenefits,
     });
   } catch (error) {
-    if (!(error instanceof HttpError)) {
-      console.error('Error creating event benefit:', error);
-    }
+    console.error('Error creating event:', error);
     next(error);
   }
 };
 
-export const updateEventBenefit = async (req, res, next) => {
+export const updateEvent = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { eventId, benefitId } = req.body;
+    const { benefitIds, categoryIds, ...eventData } = req.body;
 
-    if (!id) {
-      throw new HttpError('ID event benefit tidak valid', 400);
-    }
-
-    // Cek apakah event benefit ada
-    const existingEventBenefit =
-      await eventBenefitModel.getEventBenefitById(id);
-
-    if (!existingEventBenefit) {
-      throw new HttpError('Event benefit tidak ditemukan', 404);
-    }
-
-    // Validasi event
-    if (eventId && eventId !== existingEventBenefit.eventId) {
-      const existingEvent = await prisma.event.findUnique({
-        where: { id: eventId },
+    // Validasi input
+    if (!benefitIds || benefitIds.length === 0) {
+      return res.status(400).json({
+        message: 'Manfaat event tidak boleh kosong',
       });
-
-      if (!existingEvent) {
-        throw new HttpError('Event tidak ditemukan', 404);
-      }
     }
 
-    // Validasi benefit
-    if (benefitId && benefitId !== existingEventBenefit.benefitId) {
-      const existingBenefit = await prisma.benefit.findUnique({
-        where: { id: benefitId },
+    if (!categoryIds || categoryIds.length === 0) {
+      return res.status(400).json({
+        message: 'Kategori tidak boleh kosong',
       });
-
-      if (!existingBenefit) {
-        throw new HttpError('Benefit tidak ditemukan', 404);
-      }
     }
 
-    const updatedEventBenefit = await eventBenefitModel.updateEventBenefit(id, {
-      eventId: eventId || existingEventBenefit.eventId,
-      benefitId: benefitId || existingEventBenefit.benefitId,
+    // Ambil data event yang ada
+    const existingEvent = await eventModel.getEventById(id);
+    if (!existingEvent) {
+      return res.status(404).json({
+        message: 'Event tidak ditemukan',
+      });
+    }
+
+    // Upload banner baru jika ada
+    let bannerData = {};
+    if (req.file) {
+      if (existingEvent.bannerImageId) {
+        // Hapus banner lama
+        await deleteImageFromImagekit(existingEvent.bannerImageId);
+      }
+
+      const uploadResponse = await uploadToImageKit(req.file);
+      bannerData = {
+        bannerImageId: uploadResponse.fileId,
+        bannerUrl: uploadResponse.thumbnailUrl,
+      };
+    }
+
+    // Konversi tipe data yang perlu dikonversi
+    const eventDataProcessed = {
+      ...eventData,
+      // Konversi nilai string numerik ke tipe data yang sesuai
+      maxApplicant: eventData.maxApplicant
+        ? parseInt(eventData.maxApplicant, 10)
+        : null,
+      acceptedQuota: eventData.acceptedQuota
+        ? parseInt(eventData.acceptedQuota, 10)
+        : null,
+      isPaid: eventData.isPaid === 'true' || eventData.isPaid === true,
+      isRelease: eventData.isRelease === 'true' || eventData.isRelease === true,
+      price: eventData.price ? parseFloat(eventData.price) : 0,
+      latitude: eventData.latitude ? parseFloat(eventData.latitude) : null,
+      longitude: eventData.longitude ? parseFloat(eventData.longitude) : null,
+    };
+
+    // Prepare update data
+    const dataEventWillUpdate = {
+      ...eventDataProcessed,
+      ...bannerData,
+      updatedAt: new Date(),
+    };
+
+    if (dataEventWillUpdate.title) {
+      dataEventWillUpdate.slug = generateSlug(dataEventWillUpdate.title);
+    }
+
+    // Update event data
+    await eventModel.updateEventById(id, {
+      ...dataEventWillUpdate,
+      categoryIds: categoryIds,
     });
+
+    // Update event benefits
+    try {
+      if (benefitIds && benefitIds.length > 0) {
+        // Gunakan method yang lebih aman untuk update benefits
+        await eventBenefitModel.updateEventBenefits(id, benefitIds);
+      }
+    } catch (error) {
+      console.error('Error updating event benefits:', error);
+    }
+
+    // Ambil event yang sudah diupdate lengkap dengan relasi
+    const updatedEvent = await eventModel.getEventById(id);
 
     res.status(200).json({
-      message: 'Event benefit berhasil diperbarui',
-      data: updatedEventBenefit,
+      message: 'Event berhasil diupdate',
+      data: updatedEvent,
     });
   } catch (error) {
-    if (!(error instanceof HttpError)) {
-      console.error('Error updating event benefit:', error);
-    }
+    console.error('Error updating event:', error);
     next(error);
   }
 };
 
-export const deleteEventBenefit = async (req, res, next) => {
+export const getEvents = async (req, res, next) => {
+  try {
+    const { user } = req;
+
+    const events = await eventModel.getEventsByUserId(user.id, req.query);
+
+    res.status(200).json({
+      message: 'Berhasil mendapatkan data event',
+      data: events,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getEvent = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    if (!id) {
-      throw new HttpError('ID event benefit tidak valid', 400);
+    const event = await eventModel.getEventById(id);
+
+    if (!event) {
+      return res.status(404).json({
+        message: 'Event tidak ditemukan',
+      });
     }
-
-    // Cek apakah event benefit ada
-    const existingEventBenefit =
-      await eventBenefitModel.getEventBenefitById(id);
-
-    if (!existingEventBenefit) {
-      throw new HttpError('Event benefit tidak ditemukan', 404);
-    }
-
-    await eventBenefitModel.deleteEventBenefit(id);
 
     res.status(200).json({
-      message: 'Event benefit berhasil dihapus',
+      message: 'Berhasil mendapatkan data event',
+      data: event,
     });
   } catch (error) {
-    if (!(error instanceof HttpError)) {
-      console.error('Error deleting event benefit:', error);
+    next(error);
+  }
+};
+
+export const deleteEvent = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const event = await eventModel.getEventById(id);
+    if (!event) {
+      return res.status(404).json({
+        message: 'Event tidak ditemukan',
+      });
     }
+
+    // Hapus banner image jika ada
+    if (event.bannerImageId) {
+      await deleteImageFromImagekit(event.bannerImageId);
+    }
+
+    // Hapus semua relasi benefit
+    try {
+      await eventBenefitModel.deleteEventBenefitsByEventId(id);
+    } catch (error) {
+      console.error('Error deleting event benefits:', error);
+    }
+
+    // Hapus event
+    await eventModel.deleteEvent(id);
+
+    res.status(200).json({
+      message: 'Event berhasil dihapus',
+    });
+  } catch (error) {
     next(error);
   }
 };

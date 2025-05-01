@@ -15,7 +15,7 @@ export default (app) => {
     authMiddleware.isAuthenticate,
     accessMiddleware.isAdminOrPartner,
     eventBenefitValidation.validateEventBenefitCreate,
-    eventBenefitController.createEventBenefit,
+    eventBenefitController.createEvent,
   );
 
   router.put(
@@ -23,14 +23,14 @@ export default (app) => {
     authMiddleware.isAuthenticate,
     accessMiddleware.isAdminOrPartner,
     eventBenefitValidation.validateEventBenefitUpdate,
-    eventBenefitController.updateEventBenefit,
+    eventBenefitController.updateEvent,
   );
 
   router.delete(
     '/:id',
     authMiddleware.isAuthenticate,
     accessMiddleware.isAdminOrPartner,
-    eventBenefitController.deleteEventBenefit,
+    eventBenefitController.deleteEvent,
   );
 
   // Public routes
@@ -38,13 +38,13 @@ export default (app) => {
     '/',
     authMiddleware.isAuthenticate,
     accessMiddleware.isAdminOrPartner,
-    eventBenefitController.getAllEventBenefits,
+    eventBenefitController.getEvent,
   );
 
-  router.get(
-    '/:id',
-    authMiddleware.isAuthenticate,
-    accessMiddleware.isAdminOrPartner,
-    eventBenefitController.getEventBenefitById,
-  );
+  // router.get(
+  //   '/:id',
+  //   authMiddleware.isAuthenticate,
+  //   accessMiddleware.isAdminOrPartner,
+  //   eventBenefitController.getEventBenefitById,
+  // );
 };
