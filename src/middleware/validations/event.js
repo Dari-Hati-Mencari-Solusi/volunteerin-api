@@ -1,3 +1,4 @@
+// middleware/validations/event.js
 import Joi from 'joi';
 import { generateJoiError } from '../../utils/joi.js';
 
@@ -35,8 +36,32 @@ const eventSchema = Joi.object({
   benefitIds: Joi.array().items(Joi.string().uuid()).min(1).required(),
 });
 
+/**
+ * Memproses array dari form-data
+ * @param {any} value - Nilai yang akan diproses
+ * @returns {Array} Array yang sudah diproses
+ */
+const processArrayFromFormData = (value) => {
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      return value.split(',');
+    }
+  }
+  return value;
+};
+
+/**
+ * Validasi untuk pembuatan event
+ */
 export const validateEventCreate = async (req, res, next) => {
   try {
+    // Proses benefitIds dan categoryIds dari form-data
+    req.body.benefitIds = processArrayFromFormData(req.body.benefitIds);
+    req.body.categoryIds = processArrayFromFormData(req.body.categoryIds);
+
+    // Validasi schema
     await eventSchema.validateAsync(req.body, {
       abortEarly: false,
       stripUnknown: true,
@@ -45,14 +70,22 @@ export const validateEventCreate = async (req, res, next) => {
     next();
   } catch (error) {
     return res.status(400).json({
-      message: 'Terjadi kesalahan',
+      message: 'Terjadi kesalahan pada validasi event',
       errors: generateJoiError(error),
     });
   }
 };
 
+/**
+ * Validasi untuk update event
+ */
 export const validateEventUpdate = async (req, res, next) => {
   try {
+    // Proses benefitIds dan categoryIds dari form-data
+    req.body.benefitIds = processArrayFromFormData(req.body.benefitIds);
+    req.body.categoryIds = processArrayFromFormData(req.body.categoryIds);
+
+    // Validasi schema
     await eventSchema.validateAsync(req.body, {
       abortEarly: false,
       stripUnknown: true,
@@ -61,7 +94,7 @@ export const validateEventUpdate = async (req, res, next) => {
     next();
   } catch (error) {
     return res.status(400).json({
-      message: 'Terjadi kesalahan',
+      message: 'Terjadi kesalahan pada validasi event',
       errors: generateJoiError(error),
     });
   }
