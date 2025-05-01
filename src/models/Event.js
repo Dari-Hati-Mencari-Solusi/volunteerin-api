@@ -1,50 +1,6 @@
 import prisma from '../configs/dbConfig.js';
 import { HttpError } from '../utils/error.js';
 
-export const addEventBenefits = async (eventId, benefitIds) => {
-  const eventBenefitData = benefitIds.map((benefitId) => ({
-    eventId,
-    benefitId,
-  }));
-
-  await prisma.eventBenefit.createMany({
-    data: eventBenefitData,
-  });
-
-  return prisma.event.findUnique({
-    where: { id: eventId },
-    include: {
-      categories: true,
-      eventBenefits: {
-        include: {
-          benefit: true,
-        },
-      },
-    },
-  });
-};
-
-export const updateEventBenefits = async (eventId, benefitIds) => {
-  // Hapus semua benefit yang ada terlebih dahulu
-  await prisma.eventBenefit.deleteMany({
-    where: {
-      eventId,
-    },
-  });
-
-  // Tambahkan benefit baru
-  const eventBenefitData = benefitIds.map((benefitId) => ({
-    eventId,
-    benefitId,
-  }));
-
-  await prisma.eventBenefit.createMany({
-    data: eventBenefitData,
-  });
-
-  return true;
-};
-
 export const getAllEvents = async (query = {}) => {
   const {
     page = 1,
@@ -228,11 +184,6 @@ export const getEventsByUserId = async (userId, query = {}) => {
           name: true,
         },
       },
-      eventBenefits: {
-        include: {
-          benefit: true,
-        },
-      },
     },
     skip,
     take: parseInt(limit),
@@ -257,55 +208,138 @@ export const getEventById = async (id) => {
     where: { id },
     include: {
       categories: true,
-      eventBenefits: {
-        include: {
-          benefit: true,
-        },
-      },
     },
   });
 };
 
 export const createEvent = async (data) => {
-  const event = await prisma.event.create({
-    data: {
-      ...data,
-      categories: {
-        connect: data.categoryIds?.map((id) => ({ id })) || [],
+  try {
+    const { categoryIds, benefitIds, ...eventData } = data;
+
+    const event = await prisma.event.create({
+      data: {
+        ...eventData,
+        maxApplicant: eventData.maxApplicant
+          ? Number(eventData.maxApplicant)
+          : null,
+        acceptedQuota: eventData.acceptedQuota
+          ? Number(eventData.acceptedQuota)
+          : null,
+        isPaid:
+          typeof eventData.isPaid === 'string'
+            ? eventData.isPaid === 'true'
+            : !!eventData.isPaid,
+        price: eventData.price ? Number(eventData.price) : 0,
+        latitude: eventData.latitude ? Number(eventData.latitude) : null,
+        longitude: eventData.longitude ? Number(eventData.longitude) : null,
+        isRelease:
+          typeof eventData.isRelease === 'string'
+            ? eventData.isRelease === 'true'
+            : !!eventData.isRelease,
+        categories:
+          categoryIds && categoryIds.length > 0
+            ? {
+                connect: categoryIds.map((id) => ({ id })),
+              }
+            : undefined,
       },
-    },
-    include: {
-      categories: true,
-    },
-  });
-  return event;
+      include: {
+        categories: true,
+      },
+    });
+
+    return {
+      ...event,
+      benefitIds: benefitIds,
+    };
+  } catch (error) {
+    if (error.code === 'P2002') {
+      throw new HttpError('Event dengan judul tersebut sudah ada', 400);
+    }
+    throw error;
+  }
 };
 
 export const updateEventById = async (id, data) => {
-  const categoryIds = data.categoryIds;
-  delete data.categoryIds;
+  try {
+    const { categoryIds, benefitIds, ...updateData } = data;
 
-  let updateData = { ...data };
+    let eventUpdate = { ...updateData };
 
-  if (categoryIds && categoryIds.length > 0) {
-    const event = await prisma.event.findUnique({
+    if (updateData.maxApplicant !== undefined) {
+      eventUpdate.maxApplicant = updateData.maxApplicant
+        ? Number(updateData.maxApplicant)
+        : null;
+    }
+
+    if (updateData.acceptedQuota !== undefined) {
+      eventUpdate.acceptedQuota = updateData.acceptedQuota
+        ? Number(updateData.acceptedQuota)
+        : null;
+    }
+
+    if (updateData.isPaid !== undefined) {
+      eventUpdate.isPaid =
+        typeof updateData.isPaid === 'string'
+          ? updateData.isPaid === 'true'
+          : !!updateData.isPaid;
+    }
+
+    if (updateData.price !== undefined) {
+      eventUpdate.price = updateData.price ? Number(updateData.price) : 0;
+    }
+
+    if (updateData.latitude !== undefined) {
+      eventUpdate.latitude = updateData.latitude
+        ? Number(updateData.latitude)
+        : null;
+    }
+
+    if (updateData.longitude !== undefined) {
+      eventUpdate.longitude = updateData.longitude
+        ? Number(updateData.longitude)
+        : null;
+    }
+
+    if (updateData.isRelease !== undefined) {
+      eventUpdate.isRelease =
+        typeof updateData.isRelease === 'string'
+          ? updateData.isRelease === 'true'
+          : !!updateData.isRelease;
+    }
+
+    if (categoryIds && categoryIds.length > 0) {
+      const event = await prisma.event.findUnique({
+        where: { id },
+        include: { categories: true },
+      });
+
+      if (event) {
+        eventUpdate.categories = {
+          disconnect: event.categories.map((cat) => ({ id: cat.id })),
+          connect: categoryIds.map((catId) => ({ id: catId })),
+        };
+      }
+    }
+
+    const updatedEvent = await prisma.event.update({
       where: { id },
-      include: { categories: true },
+      data: eventUpdate,
+      include: {
+        categories: true,
+      },
     });
 
-    updateData.categories = {
-      disconnect: event.categories.map((cat) => ({ id: cat.id })),
-      connect: categoryIds.map((catId) => ({ id: catId })),
+    return {
+      ...updatedEvent,
+      benefitIds: benefitIds,
     };
+  } catch (error) {
+    if (error.code === 'P2025') {
+      throw new HttpError('Event tidak ditemukan', 404);
+    }
+    throw error;
   }
-
-  return prisma.event.update({
-    where: { id },
-    data: updateData,
-    include: {
-      categories: true,
-    },
-  });
 };
 
 export const deleteEvent = async (id) => {

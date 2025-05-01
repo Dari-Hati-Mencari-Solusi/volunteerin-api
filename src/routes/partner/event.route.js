@@ -30,14 +30,14 @@ export default (app) => {
   );
 
   router.get(
-    '/',
+    '/events',
     authMiddleware.isAuthenticate,
     accessMiddleware.isPartner,
     eventController.getEvents,
   );
 
   router.get(
-    '/:id',
+    '/events/:id',
     authMiddleware.isAuthenticate,
     accessMiddleware.isPartner,
     eventMiddleware.ensureEventOwner,
@@ -45,7 +45,7 @@ export default (app) => {
   );
 
   router.patch(
-    '/:id',
+    '/events/:id',
     authMiddleware.isAuthenticate,
     accessMiddleware.isPartner,
     partnerProfileMiddleware.ensurePartnerProfileExists,
@@ -56,13 +56,13 @@ export default (app) => {
       ['image/png', 'image/jpg', 'image/jpeg'],
       'File yang diunggah harus dalam format PNG, JPG, atau JPEG.',
     ),
-    imageMiddleware.maxDimensionOfFile(300, 600),
+    imageMiddleware.maxDimensionOfFile(600, 300),
     eventValidation.validateEventUpdate,
     eventController.updateEvent,
   );
 
   router.delete(
-    '/:id',
+    '/events/:id',
     authMiddleware.isAuthenticate,
     accessMiddleware.isPartner,
     eventMiddleware.ensureEventOwner,
