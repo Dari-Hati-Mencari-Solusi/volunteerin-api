@@ -2,39 +2,49 @@ import Joi from 'joi';
 import { generateJoiError } from '../../utils/joi.js';
 
 const eventBenefitSchema = Joi.object({
-  name: Joi.string().max(20).required(),
-  icon: Joi.string().max(20).required(),
-  description: Joi.string().optional(),
+  eventId: Joi.string().uuid().required(),
+  benefitId: Joi.string().uuid().required(),
+}).options({
+  stripUnknown: true,
+  abortEarly: false,
 });
 
 export const validateEventBenefitCreate = async (req, res, next) => {
   try {
-    await eventBenefitSchema.validateAsync(req.body, {
+    const { error, value } = eventBenefitSchema.validate(req.body, {
       abortEarly: false,
-      stripUnknown: true,
     });
 
+    if (error) {
+      return res.status(400).json({
+        message: 'Terjadi kesalahan validasi',
+        errors: generateJoiError(error),
+      });
+    }
+
+    req.body = value;
     next();
   } catch (error) {
-    return res.status(400).json({
-      message: 'Terjadi kesalahan',
-      errors: generateJoiError(error),
-    });
+    next(error);
   }
 };
 
 export const validateEventBenefitUpdate = async (req, res, next) => {
   try {
-    await eventBenefitSchema.validateAsync(req.body, {
+    const { error, value } = eventBenefitSchema.validate(req.body, {
       abortEarly: false,
-      stripUnknown: true,
     });
 
+    if (error) {
+      return res.status(400).json({
+        message: 'Terjadi kesalahan validasi',
+        errors: generateJoiError(error),
+      });
+    }
+
+    req.body = value;
     next();
   } catch (error) {
-    return res.status(400).json({
-      message: 'Terjadi kesalahan',
-      errors: generateJoiError(error),
-    });
+    next(error);
   }
 };

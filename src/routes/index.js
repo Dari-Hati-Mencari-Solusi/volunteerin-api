@@ -6,6 +6,7 @@ import categories from './category.route.js';
 import responsiblePerson from './partner/responsiblePerson.route.js';
 import legality from './partner/legality.route.js';
 import eventBenefits from './eventBenefit.route.js';
+import benefits from './benefit.route.js';
 
 export default (app) => {
   const router = Router();
@@ -19,4 +20,5 @@ export default (app) => {
   responsiblePerson(router);
   legality(router);
   eventBenefits(router);
+  benefits(router);
 };

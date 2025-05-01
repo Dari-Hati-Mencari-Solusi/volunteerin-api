@@ -1,30 +1,74 @@
 import prisma from '../configs/dbConfig.js';
 
-export const createEventBenefit = async (data) => {
-  const eventBenefit = await prisma.eventBenefit.create({ data });
-  return eventBenefit;
+export const getAllEventBenefits = async (query = {}) => {
+  const { page = 1, limit = 10, search = '' } = query;
+
+  const skip = (page - 1) * limit;
+
+  let whereClause = {};
+
+  if (search) {
+    whereClause = {
+      OR: [
+        { benefit: { name: { contains: search, mode: 'insensitive' } } },
+        { benefit: { icon: { contains: search, mode: 'insensitive' } } },
+      ],
+    };
+  }
+
+  const total = await prisma.eventBenefit.count({
+    where: whereClause,
+  });
+
+  const eventBenefits = await prisma.eventBenefit.findMany({
+    where: whereClause,
+    include: {
+      event: true,
+      benefit: true,
+    },
+    skip,
+    take: parseInt(limit),
+    orderBy: {
+      updatedAt: 'desc',
+    },
+  });
+
+  return {
+    eventBenefits,
+    pagination: {
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 };
 
-export const getAllEventBenefits = async () => {
-  return prisma.eventBenefit.findMany();
+export const getEventBenefitById = async (id) => {
+  return prisma.eventBenefit.findUnique({
+    where: { id },
+    include: {
+      event: true,
+      benefit: true,
+    },
+  });
 };
 
-export const updateEventBenefit = async (id, data) => {
+export const createEventBenefit = async (eventBenefitData) => {
+  return prisma.eventBenefit.create({
+    data: eventBenefitData,
+  });
+};
+
+export const updateEventBenefit = async (id, eventBenefitData) => {
   return prisma.eventBenefit.update({
     where: { id },
-    data,
+    data: eventBenefitData,
   });
 };
 
 export const deleteEventBenefit = async (id) => {
-  try {
-    await prisma.eventBenefit.delete({
-      where: { id },
-    });
-  } catch (error) {
-    if (error.code === 'P2025') {
-      throw new Error('EventBenefit tidak ditemukan');
-    }
-    throw error;
-  }
+  return prisma.eventBenefit.delete({
+    where: { id },
+  });
 };

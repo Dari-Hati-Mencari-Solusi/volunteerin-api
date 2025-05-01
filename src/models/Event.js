@@ -7,7 +7,7 @@ export const addEventBenefits = async (eventId, benefitIds) => {
     benefitId,
   }));
 
-  await prisma.userEventBenefit.createMany({
+  await prisma.eventBenefit.createMany({
     data: eventBenefitData,
   });
 
@@ -15,9 +15,9 @@ export const addEventBenefits = async (eventId, benefitIds) => {
     where: { id: eventId },
     include: {
       categories: true,
-      userEventBenefit: {
+      eventBenefits: {
         include: {
-          eventBenefit: true,
+          benefit: true,
         },
       },
     },
@@ -26,7 +26,7 @@ export const addEventBenefits = async (eventId, benefitIds) => {
 
 export const updateEventBenefits = async (eventId, benefitIds) => {
   // Hapus semua benefit yang ada terlebih dahulu
-  await prisma.userEventBenefit.deleteMany({
+  await prisma.eventBenefit.deleteMany({
     where: {
       eventId,
     },
@@ -38,7 +38,7 @@ export const updateEventBenefits = async (eventId, benefitIds) => {
     benefitId,
   }));
 
-  await prisma.userEventBenefit.createMany({
+  await prisma.eventBenefit.createMany({
     data: eventBenefitData,
   });
 
@@ -228,9 +228,9 @@ export const getEventsByUserId = async (userId, query = {}) => {
           name: true,
         },
       },
-      userEventBenefit: {
+      eventBenefits: {
         include: {
-          eventBenefit: true,
+          benefit: true,
         },
       },
     },
@@ -257,9 +257,9 @@ export const getEventById = async (id) => {
     where: { id },
     include: {
       categories: true,
-      userEventBenefit: {
+      eventBenefits: {
         include: {
-          eventBenefit: true,
+          benefit: true,
         },
       },
     },
