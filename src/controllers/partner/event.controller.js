@@ -1,4 +1,5 @@
 import * as eventModel from '../../models/Event.js';
+import * as eventBenefitModel from '../../models/EventBenefit.js';
 import {
   deleteImageFromImagekit,
   uploadToImageKit,
@@ -25,7 +26,7 @@ export const createEvent = async (req, res, next) => {
 
     // Tambahkan benefit ke event
     if (benefitIds && benefitIds.length > 0) {
-      event = await eventModel.addEventBenefits(event.id, benefitIds);
+      event = await eventBenefitModel.createEventBenefit(event.id, benefitIds);
     }
 
     res.status(201).json({
@@ -75,7 +76,7 @@ export const updateEvent = async (req, res, next) => {
 
     // Update benefits jika ada
     if (benefitIds && benefitIds.length > 0) {
-      await eventModel.updateEventBenefits(id, benefitIds);
+      await eventBenefitModel.updateEventBenefits(id, benefitIds);
     }
 
     // Get updated event with benefits

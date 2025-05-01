@@ -1,17 +1,19 @@
 import Joi from 'joi';
 import { generateJoiError } from '../../utils/joi.js';
 
-const eventBenefitSchema = Joi.object({
+const userEventBenefitSchema = Joi.object({
+  userId: Joi.string().uuid().allow(null),
   eventId: Joi.string().uuid().required(),
-  benefitId: Joi.string().uuid().required(),
+  customIcon: Joi.string().max(15).allow('', null),
+  customBenefit: Joi.string().max(15).allow('', null),
 }).options({
   stripUnknown: true,
   abortEarly: false,
 });
 
-export const validateEventBenefitCreate = async (req, res, next) => {
+export const validateUserEventBenefitCreate = async (req, res, next) => {
   try {
-    const { error, value } = eventBenefitSchema.validate(req.body, {
+    const { error, value } = userEventBenefitSchema.validate(req.body, {
       abortEarly: false,
     });
 
@@ -22,16 +24,20 @@ export const validateEventBenefitCreate = async (req, res, next) => {
       });
     }
 
-    req.body = value;
+    req.validatedUserEventBenefitData = {
+      ...value,
+      userId: value.userId || null,
+    };
+
     next();
   } catch (error) {
     next(error);
   }
 };
 
-export const validateEventBenefitUpdate = async (req, res, next) => {
+export const validateUserEventBenefitUpdate = async (req, res, next) => {
   try {
-    const { error, value } = eventBenefitSchema.validate(req.body, {
+    const { error, value } = userEventBenefitSchema.validate(req.body, {
       abortEarly: false,
     });
 
@@ -42,7 +48,11 @@ export const validateEventBenefitUpdate = async (req, res, next) => {
       });
     }
 
-    req.body = value;
+    req.validatedUserEventBenefitData = {
+      ...value,
+      userId: value.userId || null,
+    };
+
     next();
   } catch (error) {
     next(error);
