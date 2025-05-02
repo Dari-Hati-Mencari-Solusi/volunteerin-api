@@ -1,22 +1,35 @@
 import userSeeder from './user.seeder.js';
 import categorySeeder from './category.seeder.js';
-// import eventSeeder from './event.seeder.js';
+import benefitSeeder from './benefit.seeder.js';
+import eventSeeder from './event.seeder.js';
 import partnerProfileSeeder from './partnerProfile.seeder.js';
 import responsiblePersonSeeder from './responsiblePerson.seeder.js';
 
 const seed = async () => {
   try {
-    console.log('Seeding start! ⬇️⬇️');
+    console.log('Seeding dimulai! ⬇️⬇️');
 
     await userSeeder();
-    await categorySeeder();
-    // await eventSeeder();
-    await partnerProfileSeeder();
-    await responsiblePersonSeeder();
+    console.log('✅ User seeder selesai');
 
-    console.log('All seeds completed successfully ✅');
+    await categorySeeder();
+    console.log('✅ Category seeder selesai');
+
+    await benefitSeeder();
+    console.log('✅ Benefit seeder selesai');
+
+    await eventSeeder();
+    console.log('✅ Event seeder selesai');
+
+    await partnerProfileSeeder();
+    console.log('✅ Partner profile seeder selesai');
+
+    await responsiblePersonSeeder();
+    console.log('✅ Responsible person seeder selesai');
+
+    console.log('Semua seeder berhasil dijalankan ✅');
   } catch (error) {
-    console.error('Error while seeding:', error);
+    console.error('Error saat menjalankan seeder:', error);
   }
 };
 
