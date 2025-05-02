@@ -1,4 +1,4 @@
-import * as benefitModel from '../models/benefit.js';
+import * as benefitModel from '../models/Benefit.js';
 
 export const createBenefit = async (req, res, next) => {
   try {
