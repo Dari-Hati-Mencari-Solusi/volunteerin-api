@@ -78,6 +78,14 @@ export const getAllEvents = async (query = {}) => {
           name: true,
         },
       },
+      benefits: {
+        select: {
+          id: true,
+          name: true,
+          icon: true,
+          description: true,
+        },
+      },
       user: {
         select: {
           id: true,
@@ -208,6 +216,7 @@ export const getEventById = async (id) => {
     where: { id },
     include: {
       categories: true,
+      benefits: true,
     },
   });
 };
@@ -242,15 +251,21 @@ export const createEvent = async (data) => {
                 connect: categoryIds.map((id) => ({ id })),
               }
             : undefined,
+        benefits:
+          benefitIds && benefitIds.length > 0
+            ? {
+                connect: benefitIds.map((id) => ({ id })),
+              }
+            : undefined,
       },
       include: {
         categories: true,
+        benefits: true,
       },
     });
 
     return {
       ...event,
-      benefitIds: benefitIds,
     };
   } catch (error) {
     if (error.code === 'P2002') {
@@ -327,6 +342,7 @@ export const updateEventById = async (id, data) => {
       data: eventUpdate,
       include: {
         categories: true,
+        benefit: true,
       },
     });
 
