@@ -157,6 +157,7 @@ model Event {
   userSavedEvents UserSavedEvent[]
   participations  Participant[]
   forms           Form[]
+  benefits Benefit[]
 
   @@index([title])
   @@map("events")
@@ -199,6 +200,7 @@ model Benefit {
   updatedAt DateTime? @default(now()) @map("updated_at")
 
   user User @relation(fields: [userId], references: [id])
+  events Event[]
 
   @@map("benefits")
 }

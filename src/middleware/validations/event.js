@@ -1,10 +1,9 @@
-// middleware/validations/event.js
 import Joi from 'joi';
 import { generateJoiError } from '../../utils/joi.js';
 
 const EventType = Object.freeze({
   OPEN: 'OPEN',
-  INVITE: 'INVITE',
+  LIMITED: 'LIMITED',
 });
 
 const eventSchema = Joi.object({
