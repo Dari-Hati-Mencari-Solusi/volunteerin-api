@@ -158,6 +158,26 @@ export const updateEvent = async (req, res, next) => {
   }
 };
 
+export const getAllEvents = async (req, res, next) => {
+  try {
+    const result = await eventModel.getAllEvents(req.query);
+
+    if (!result.events.length) {
+      return res.status(400).json({
+        message: 'Tidak ada event yang ditemukan',
+      });
+    }
+
+    res.status(200).json({
+      message: 'Daftar event berhasil diambil',
+      data: result.events,
+      pagination: result.pagination,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getEvents = async (req, res, next) => {
   try {
     const { user } = req;

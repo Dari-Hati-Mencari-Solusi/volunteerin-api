@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import auth from './auth.route.js';
-import events from './partner/event.route.js';
+import partnerEvents from './partner/event.route.js';
+import events from './event.route.js';
 import partners from './partner/partnerProfile.route.js';
 import categories from './category.route.js';
 import responsiblePerson from './partner/responsiblePerson.route.js';
@@ -15,6 +16,7 @@ export default (app) => {
 
   auth(router);
   events(router);
+  partnerEvents(router);
   partners(router);
   categories(router);
   responsiblePerson(router);
