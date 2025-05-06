@@ -262,9 +262,7 @@ enum OrganizationTypes {
   COMMUNITY
   GOVERNMENT
   CORPORATE
-  FOUNDATION
   INDIVIDUAL
-  UNIVERSITY
 }
 
 enum NotificationTypes {
