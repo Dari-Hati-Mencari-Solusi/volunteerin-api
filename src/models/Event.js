@@ -14,7 +14,9 @@ export const getAllEvents = async (query = {}) => {
 
   const skip = (page - 1) * limit;
 
-  let whereClause = {};
+  let whereClause = {
+    isRelease: true,
+  };
 
   if (name) {
     whereClause = {
