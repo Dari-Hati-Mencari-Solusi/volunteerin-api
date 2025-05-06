@@ -1,17 +1,65 @@
-import { createPartnerProfile } from "../models/PartnerProfile.js";
-import { getUsers } from "../models/User.js"
+import prisma from '../configs/dbConfig.js';
+import { createPartnerProfile } from '../models/PartnerProfile.js';
+import { fakerID } from './seederConfig.js';
 
 export default async () => {
-  const users = await getUsers();
+  // Get all partner users from the database
+  const partnerUsers = await prisma.user.findMany({
+    where: {
+      role: 'PARTNER',
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
 
-  const partnerProfile = {
-    userId: users[1].id,
-    organizationType: 'COMMUNITY',
-    organizationAddress: 'GG Kapuas, Condongcatur, Depok, Sleman, Yogyakarta',
-    instagram: 'amccamikom',
-    status: 'VERIFIED',
+  if (partnerUsers.length === 0) {
+    console.log('No partner users found. Please run the user seeder first.');
+    return;
   }
 
-  await createPartnerProfile(partnerProfile);
-  console.log('Partner Profile successfully seeded.');
-}
+  // Organization types to randomly assign
+  const organizationTypes = [
+    'COMPANY',
+    'UNIVERSITY',
+    'COMMUNITY',
+    'FOUNDATION',
+    'GOVERNMENT',
+  ];
+
+  // Create profiles for each partner
+  const profiles = [];
+
+  for (const partner of partnerUsers) {
+    // Generate random data for each partner
+    const profile = {
+      userId: partner.id,
+      organizationType:
+        organizationTypes[Math.floor(Math.random() * organizationTypes.length)],
+      organizationAddress:
+        fakerID.location.streetAddress() +
+        ', ' +
+        fakerID.location.city() +
+        ', ' +
+        fakerID.location.state(),
+      instagram:
+        partner.name.toLowerCase().replace(/[^a-zA-Z0-9]/g, '') + '_official',
+      website:
+        'https://www.' +
+        partner.name.toLowerCase().replace(/[^a-zA-Z0-9]/g, '') +
+        '.org',
+      description:
+        fakerID.company.catchPhrase() + '. ' + fakerID.company.buzzPhrase(),
+      status: 'VERIFIED',
+    };
+
+    profiles.push(profile);
+
+    // Create the profile in the database
+    await createPartnerProfile(profile);
+    console.log(`Membuat profil untuk akun partner: ${partner.name}`);
+  }
+
+  console.log(`✅${profiles.length} profil partner berhasil di-seed.`);
+};
