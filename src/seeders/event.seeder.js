@@ -180,7 +180,7 @@ const seedEvents = async () => {
       longitude: 112.7685,
       bannerImageId: 'english_teaching_banner',
       bannerUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyPNVdgjWiI7FRS5JjGP7kPDfXnCFc6I9-Dw&s',
+        'https://t3.gstatic.com/licensed-image?q=tbn:ANd9GcSTzENF1irG6e8M8ufWLVI3ymVfOmUAGIIgFYuTyY-lwXABGclLcy3prcCe_iaXjOV-CIV0RLV7jDlvBjfDEDQ',
       isRelease: true,
       categoryNames: ['Pendidikan', 'Sosial'],
       userIndex: 0,
@@ -207,7 +207,7 @@ const seedEvents = async () => {
       longitude: 110.3267,
       bannerImageId: 'mangrove_planting_banner',
       bannerUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXcC3xsRXl8H4m36RK_OrZdZhZPzxkwR7kLA&s',
+        'https://untar.ac.id/wp-content/uploads/2024/05/WhatsApp-Image-2024-05-03-at-09.20.10_20769551.jpg',
       isRelease: true,
       categoryNames: ['Lingkungan', 'Konservasi'],
       userIndex: 1,
@@ -226,8 +226,8 @@ const seedEvents = async () => {
       endAt: new Date(2025, 5, 21, 16, 0), // 21 Juni 2025, 16:00
       isPaid: true,
       price: 150000,
-      province: 'DI Yogyakarta',
-      regency: 'Kota Yogyakarta',
+      province: 'Sumatera Selatan',
+      regency: 'Palembang',
       address:
         'Co-working Space Jogja Digital Valley, Jl. Magelang KM 6, Yogyakarta',
       gmaps: 'https://maps.google.com/?q=-7.7833,110.3667',
@@ -235,7 +235,7 @@ const seedEvents = async () => {
       longitude: 110.3667,
       bannerImageId: 'digital_marketing_banner',
       bannerUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQo-c8MUBfU5GLPVXXwlp1-cB1B7D_NnQB_bQ&s',
+        'https://diskopukm.palembang.go.id/uploads/BWS_2319_816f9b65b4.JPG',
       isRelease: true,
       categoryNames: ['Teknologi', 'Ekonomi'],
       userIndex: 2,
@@ -262,7 +262,7 @@ const seedEvents = async () => {
       longitude: 106.806,
       bannerImageId: 'plastic_craft_banner',
       bannerUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJkRFdMH_eQXXnDZ9KL0ZtZhxglKQHOJdY_A&s',
+        'https://dlh.bulelengkab.go.id/uploads/konten/56_ubah-sampah-plastik-menjadi-bahan-kerajinan-yang-bermanfaat.jpg',
       isRelease: true,
       categoryNames: ['Lingkungan', 'Seni'],
       userIndex: 0,
@@ -289,7 +289,7 @@ const seedEvents = async () => {
       longitude: 98.6731,
       bannerImageId: 'health_check_banner',
       bannerUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSH-znRh8yEt7ggaQTztD8hNNOBdJgnUn3b2w&s',
+        'https://ayosehat.kemkes.go.id/imagex/content/172cb79a73a19621ec59eed9ad860a68.webp',
       isRelease: true,
       categoryNames: ['Kesehatan', 'Sosial'],
       userIndex: 1,
@@ -316,7 +316,7 @@ const seedEvents = async () => {
       longitude: 106.8823,
       bannerImageId: 'robotics_banner',
       bannerUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrQPOFyDlMCNZ9JBd7LmUWa9XevVHiOg_fBg&s',
+        'https://ugm.ac.id/wp-content/uploads/2024/08/Bulukerto-1-1024x768.jpg',
       isRelease: true,
       categoryNames: ['Pendidikan', 'Teknologi'],
       userIndex: 2,
@@ -343,7 +343,7 @@ const seedEvents = async () => {
       longitude: 112.6304,
       bannerImageId: 'first_aid_banner',
       bannerUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9RqNdBMAGfNOGW4m7-dF1TIwgrlI_cmmAKQ&s',
+        'https://rspp.co.id/uploads/img_post/img_2405202316849208648988B.jpg',
       isRelease: true,
       categoryNames: ['Kesehatan', 'Pendidikan'],
       userIndex: 0,
@@ -370,7 +370,7 @@ const seedEvents = async () => {
       longitude: 110.8318,
       bannerImageId: 'elderly_support_banner',
       bannerUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHzLNfZ_s1C6w9Zy2UWVW8CyTJGUeNOc9OYQ&s',
+        'https://cdn.hellosehat.com/wp-content/uploads/2019/10/pengobatan-kanker-untuk-lansia-1024x683.jpg',
       isRelease: true,
       categoryNames: ['Sosial', 'Kesehatan'],
       userIndex: 1,
@@ -397,7 +397,7 @@ const seedEvents = async () => {
       longitude: 115.2625,
       bannerImageId: 'cultural_festival_banner',
       bannerUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWB-qaK_wXgJUPd9Qc8sLFBNgkF4ReCyLVIQ&s',
+        'https://blue.kumparan.com/image/upload/fl_progressive,fl_lossy,c_fill,q_auto:best,w_640/v1634025439/01hsbfcqdne1tm2f880wckbsq8.jpg',
       isRelease: true,
       categoryNames: ['Seni', 'Budaya'],
       userIndex: 2,
@@ -424,7 +424,7 @@ const seedEvents = async () => {
       longitude: 106.8163,
       bannerImageId: 'disability_app_banner',
       bannerUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbYP-haQYMc4KBET9tP61vj56L6IpvKv7Xcg&s',
+        'https://ppid.ugm.ac.id/wp-content/uploads/sites/253/2023/09/3001231675056995602226920-1-765x510-1.jpeg',
       isRelease: true,
       categoryNames: ['Teknologi', 'Sosial'],
       userIndex: 0,
@@ -451,7 +451,7 @@ const seedEvents = async () => {
       longitude: 106.8223,
       bannerImageId: 'mental_health_banner',
       bannerUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_WBBB9XllVUvG9cDPXEchnW8gYIJ6YgufnA&s',
+        'https://www.itenas.ac.id/wp-content/uploads/2024/10/Web_IMHD24-24-2048x1536.jpg',
       isRelease: true,
       categoryNames: ['Kesehatan', 'Pendidikan'],
       userIndex: 1,
@@ -478,7 +478,7 @@ const seedEvents = async () => {
       longitude: 115.2167,
       bannerImageId: 'healthy_living_banner',
       bannerUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6xXkzZcJmYg4vGxWjXy2a6bqkVtLh4n7r8A&s',
+        'hhttps://journal-fik.um.ac.id/public/journals/3/submission_97_97_coverImage_en_US.jpg',
       isRelease: true,
       categoryNames: ['Kesehatan', 'Pendidikan'],
       userIndex: 2,
