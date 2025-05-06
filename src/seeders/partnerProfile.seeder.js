@@ -24,9 +24,7 @@ export default async () => {
     'COMMUNITY',
     'GOVERNMENT',
     'CORPORATE',
-    'FOUNDATION',
     'INDIVIDUAL',
-    'UNIVERSITY',
   ];
 
   const profiles = [];

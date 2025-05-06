@@ -5,9 +5,7 @@ const OrganizationType = Object.freeze({
   COMMUNITY: 'COMMUNITY',
   GOVERNMENT: 'GOVERNMENT',
   CORPORATE: 'CORPORATE',
-  FOUNDATION: 'FOUNDATION',
   INDIVIDUAL: 'INDIVIDUAL',
-  UNIVERSITY: 'UNIVERSITY',
 });
 
 const partnerProfileSchema = Joi.object({
