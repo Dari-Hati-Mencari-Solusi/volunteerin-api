@@ -38,3 +38,27 @@ export const ensureEventOwner = async (req, _, next) => {
     next(error);
   }
 };
+
+export const ensureEventIsReleased = async (req, _, next) => {
+  try {
+    const eventId = req.params.id;
+
+    const event = req.event || (await eventModel.getEventById(eventId));
+
+    if (!event) {
+      throw new HttpError('Event tidak ditemukan', 404);
+    }
+
+    if (!event.isRelease) {
+      throw new HttpError('Event ini belum dipublikasikan', 403);
+    }
+
+    if (!req.event) {
+      req.event = event;
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
