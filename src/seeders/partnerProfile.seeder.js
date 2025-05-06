@@ -21,7 +21,7 @@ export default async () => {
 
   // Organization types to randomly assign
   const organizationTypes = [
-    'COMPANY',
+    'CORPORATE',
     'UNIVERSITY',
     'COMMUNITY',
     'FOUNDATION',
