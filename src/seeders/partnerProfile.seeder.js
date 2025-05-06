@@ -14,16 +14,19 @@ export default async () => {
   });
 
   if (partnerUsers.length === 0) {
-    console.log('No partner users found. Please run the user seeder first.');
+    console.log(
+      'Tidak ada partner profil yang ditemukan.coba jalankan user seeder terlebih dahulu.',
+    );
     return;
   }
 
   const organizationTypes = [
-    'CORPORATE',
-    'UNIVERSITY',
     'COMMUNITY',
-    'FOUNDATION',
     'GOVERNMENT',
+    'CORPORATE',
+    'FOUNDATION',
+    'INDIVIDUAL',
+    'UNIVERSITY',
   ];
 
   const profiles = [];
