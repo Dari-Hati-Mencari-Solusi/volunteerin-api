@@ -3,7 +3,6 @@ import { createPartnerProfile } from '../models/PartnerProfile.js';
 import { fakerID } from './seederConfig.js';
 
 export default async () => {
-  // Get all partner users from the database
   const partnerUsers = await prisma.user.findMany({
     where: {
       role: 'PARTNER',
@@ -19,7 +18,6 @@ export default async () => {
     return;
   }
 
-  // Organization types to randomly assign
   const organizationTypes = [
     'CORPORATE',
     'UNIVERSITY',
@@ -43,13 +41,10 @@ export default async () => {
         fakerID.location.state(),
       instagram:
         partner.name.toLowerCase().replace(/[^a-zA-Z0-9]/g, '') + '_official',
-      website:
-        'https://www.' +
-        partner.name.toLowerCase().replace(/[^a-zA-Z0-9]/g, '') +
-        '.org',
-      description:
+      information:
         fakerID.company.catchPhrase() + '. ' + fakerID.company.buzzPhrase(),
       status: 'VERIFIED',
+      eventQuota: 10,
     };
 
     profiles.push(profile);
