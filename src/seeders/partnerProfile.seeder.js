@@ -28,11 +28,9 @@ export default async () => {
     'GOVERNMENT',
   ];
 
-  // Create profiles for each partner
   const profiles = [];
 
   for (const partner of partnerUsers) {
-    // Generate random data for each partner
     const profile = {
       userId: partner.id,
       organizationType:
@@ -56,7 +54,6 @@ export default async () => {
 
     profiles.push(profile);
 
-    // Create the profile in the database
     await createPartnerProfile(profile);
     console.log(`Membuat profil untuk akun partner: ${partner.name}`);
   }
