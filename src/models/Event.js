@@ -14,7 +14,9 @@ export const getAllEvents = async (query = {}) => {
 
   const skip = (page - 1) * limit;
 
-  let whereClause = {};
+  let whereClause = {
+    isRelease: true,
+  };
 
   if (name) {
     whereClause = {
@@ -128,6 +130,7 @@ export const getEventsByUserId = async (userId, query = {}) => {
 
   let whereClause = {
     userId,
+    isRelease: true,
   };
 
   if (name) {
@@ -173,10 +176,7 @@ export const getEventsByUserId = async (userId, query = {}) => {
   }
 
   if (publish !== undefined) {
-    whereClause = {
-      ...whereClause,
-      isRelease: publish === '1',
-    };
+    whereClause.isRelease = publish === '1';
   }
 
   const total = await prisma.event.count({
