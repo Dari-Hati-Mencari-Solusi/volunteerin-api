@@ -1,6 +1,8 @@
+import path from "path";
 import { sendEmail } from '../configs/mailConfig.js';
 import * as userModel from '../models/User.js';
 import * as cryptos from '../utils/crypto.js';
+import ejs from "ejs";
 import jwt from 'jsonwebtoken';
 import { HttpError } from '../utils/error.js';
 import { generateToken } from '../utils/jwt.js';
@@ -24,18 +26,24 @@ export const register = async (req, res, next) => {
     const token = generateToken(payload, '30m');
 
     const sender = {
-      address: user.email,
-      name: user.name,
+      address: 'hello@demomailtrap.com',
+      name: 'Volunteerin',
     };
+
     const recipients = ['volunteerinbusiness@gmail.com'];
     const verifyUrl = `${process.env.FE_BASE_URL}/verify-email?t=${token}`;
     const subject = `Verifikasi Akun Volunteerin ${role === 'PARTNER' ? 'Partner' : ''} kamu`;
+
+    const htmlContent = await ejs.renderFile(
+      path.join(process.cwd(), "./src/views/emails/email-verification.ejs"),
+      { name: user.name, verifyUrl }
+    );
 
     await sendEmail(
       sender,
       recipients,
       subject,
-      `<p>Your verification url: <a href="${verifyUrl}">Klik disini</a></p>`,
+      htmlContent
     );
 
     res.status(200).json({
@@ -109,17 +117,24 @@ export const resendEmailVerification = async (req, res, next) => {
     const token = generateToken(payload, '30m');
 
     const sender = {
-      address: user.email,
-      name: user.name,
+      address: 'hello@demomailtrap.com',
+      name: 'Volunteerin',
     };
+
     const recipients = ['volunteerinbusiness@gmail.com'];
     const verifyUrl = `${process.env.FE_BASE_URL}/verify-email?t=${token}`;
-    const subject = `Verifikasi Akun Volunteerin ${user.email === 'PARTNER' ? 'Partner' : ''} kamu`;
+    const subject = `Verifikasi Akun Volunteerin ${user.role === 'PARTNER' ? 'Partner' : ''} kamu`;
+
+    const htmlContent = await ejs.renderFile(
+      path.join(process.cwd(), "./src/views/emails/email-verification.ejs"),
+      { name: user.name, verifyUrl }
+    );
+
     await sendEmail(
       sender,
       recipients,
       subject,
-      `<p>Your verification url: <a href="${verifyUrl}">Klik disini</a></p>`,
+      htmlContent
     );
 
     res.status(200).json({
@@ -139,17 +154,21 @@ export const forgotPassword = async (req, res, next) => {
     const token = generateToken(payload, '30m');
 
     const sender = {
-      address: user.email,
-      name: user.name,
+      address: 'hello@demomailtrap.com',
+      name: 'Volunteerin',
     };
     const recipients = ['volunteerinbusiness@gmail.com'];
-    const verifyUrl = `${process.env.FE_BASE_URL}/reset-pw?t=${token}`;
+    const resetPwUrl = `${process.env.FE_BASE_URL}/reset-pw?t=${token}`;
     const subject = `Reset Password`;
+    const htmlContent = await ejs.renderFile(
+      path.join(process.cwd(), "./src/views/emails/reset-password.ejs"),
+      { name: user.name, resetPwUrl }
+    );
     await sendEmail(
       sender,
       recipients,
       subject,
-      `<p>Your reset password url: <a href="${verifyUrl}">Klik disini</a></p>`,
+      htmlContent,
     );
 
     res.status(200).json({
