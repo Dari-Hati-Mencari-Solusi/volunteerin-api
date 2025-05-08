@@ -226,10 +226,6 @@ export const getEventById = async (id) => {
           role: true,
           avatarUrl: true,
           isSubscribed: true,
-          lastLoginAt: true,
-          verifiedAt: true,
-          createdAt: true,
-          updatedAt: true,
           partner: {
             select: {
               instagram: true,
