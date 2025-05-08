@@ -217,6 +217,29 @@ export const getEventById = async (id) => {
     include: {
       categories: true,
       benefits: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phoneNumber: true,
+          role: true,
+          avatarUrl: true,
+          isSubscribed: true,
+          lastLoginAt: true,
+          verifiedAt: true,
+          createdAt: true,
+          updatedAt: true,
+          partner: {
+            select: {
+              instagram: true,
+              organizationType: true,
+              organizationAddress: true,
+              status: true,
+            },
+          },
+        },
+      },
     },
   });
 };
