@@ -286,9 +286,10 @@ enum ParticipantStatus {
 
 enum PartnerStatus {
   REVIEWED
-  ACCEPTED
-  REJECTED
-  VERIFIED
+  ACCEPTED_PROFILE
+  ACCEPTED_LEGALITY
+  REJECTED_PROFILE
+  REJECTED_LEGALITY
 }
 
 enum EventType {
