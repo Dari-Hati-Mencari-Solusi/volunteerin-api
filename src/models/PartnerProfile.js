@@ -1,5 +1,6 @@
 import prisma from '../configs/dbConfig.js';
 import { HttpError } from '../utils/error.js';
+import { filterAllowedRelation } from "../utils/object.js"
 
 export const getAllPartnerProfiles = async (query = {}) => {
   const { page = 1, limit = 10, search = '', status } = query;
@@ -82,14 +83,19 @@ export const getPartnerProfiles = async () => {
 }
 
 export const getPartnerProfileById = async (id) => {
+
   return prisma.partnerProfile.findUnique({
-    where: { id },
+    where: { id }
   });
 };
 
-export const getPartnerProfileByUserId = async (userId) => {
+export const getPartnerProfileByUserId = async (userId, includeWith = {}) => {
+  const allowedRelations = ['legality'];
+  includeWith = filterAllowedRelation(includeWith, allowedRelations)
+  
   return prisma.partnerProfile.findUnique({
     where: { userId },
+    include: includeWith
   });
 };
 
@@ -117,3 +123,13 @@ export const deletePartnerProfile = async (id) => {
     throw error;
   }
 };
+
+export const reviewPartnerUserByUserId = async (userId, reviewResult, message) => {
+  return prisma.partnerProfile.update({
+    where: { userId: userId },
+    data: {
+      status: reviewResult,
+      information: message
+    }
+  });
+}

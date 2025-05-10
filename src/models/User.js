@@ -1,11 +1,58 @@
 import prisma from '../configs/dbConfig.js';
+import { filterAllowedRelation } from '../utils/object.js';
 
-export const getUsers = async () => {
-  return prisma.user.findMany();
+export const getUsers = async ({s: search, role, page, limit, sort}) => {
+  role = role?.toUpperCase(role);
+  
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  sort = sort || 'desc';
+  const skip = (page - 1) * limit;
+
+
+  const where = {
+    ...(role?.trim() && { role }),
+    ...(search?.trim() && {
+      OR: [
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } }
+      ]
+    })
+  }
+
+
+  const [users, totalItems] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { createdAt: sort }
+    }),
+    prisma.user.count({ 
+      where,
+      skip,
+      take: limit 
+    })
+  ]);
+
+  const totalPages = Math.ceil(totalItems / limit);
+
+  return {
+    currentPage: page,
+    totalPages,
+    totalItems,
+    data: users,
+  }
 }
 
-export const getUserById = async (id) => {
-  return prisma.user.findUnique({ where: { id } });
+export const getUserById = async (id, includeWith = {}) => {
+  const allowedRelations = ['profile', 'partner', 'benefit'];
+  includeWith = filterAllowedRelation(includeWith, allowedRelations)
+
+  return prisma.user.findUnique({ 
+    where: { id },
+    include: includeWith
+  });
 };
 
 export const getUserByEmail = async (email) => {
