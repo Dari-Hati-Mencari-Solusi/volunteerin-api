@@ -44,7 +44,7 @@ export default async () => {
         partner.name.toLowerCase().replace(/[^a-zA-Z0-9]/g, '') + '_official',
       information:
         fakerID.company.catchPhrase() + '. ' + fakerID.company.buzzPhrase(),
-      status: 'VERIFIED',
+      status: 'ACCEPTED_LEGALITY',
       eventQuota: 10,
     };
 

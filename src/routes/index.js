@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import auth from './auth.route.js';
-import partnerEvents from './partner/event.route.js';
 import events from './event.route.js';
 import partners from './partner/partnerProfile.route.js';
 import categories from './category.route.js';
@@ -8,19 +7,28 @@ import responsiblePerson from './partner/responsiblePerson.route.js';
 import legality from './partner/legality.route.js';
 import eventBenefits from './eventBenefit.route.js';
 import benefits from './benefit.route.js';
+import partnerEvents from './partner/event.route.js';
+import adminUsers from './admin/user.route.js';
 
 export default (app) => {
   const router = Router();
-
+  
   app.use('/', router);
-
+  
+  // Volunteer Route
   auth(router);
   events(router);
-  partnerEvents(router);
   partners(router);
   categories(router);
   responsiblePerson(router);
   legality(router);
   eventBenefits(router);
   benefits(router);
+
+  // Partner Route
+  partnerEvents(router);
+
+  // Admin Route
+  adminUsers(router);
+
 };
