@@ -36,15 +36,16 @@ export default (app) => {
     authMiddleware.isAuthenticate,
     accessMiddleware.isPartner,
     formValidation.validateFormUpdate,
+    partnerStatusMiddleware.isProfileAccepted,
     formMiddleware.ensureFormOwner,
     formController.updateForm,
   );
 
-  router.delete(
-    '/:id',
-    authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
-    formMiddleware.ensureFormOwner,
-    formController.deleteForm,
-  );
+  // router.delete(
+  //   '/:id',
+  //   authMiddleware.isAuthenticate,
+  //   accessMiddleware.isPartner,
+  //   formMiddleware.ensureFormOwner,
+  //   formController.deleteForm,
+  // );
 };
