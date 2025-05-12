@@ -3,7 +3,7 @@ import * as authMiddleware from '../../middleware/auth.js';
 import * as accessMiddleware from '../../middleware/access.js';
 import * as uploadMiddleware from '../../middleware/upload.js';
 import * as imageMiddleware from '../../middleware/image.js';
-import * as eventController from '../../controllers/partner/event.controller.js';
+import * as eventController from '../../controllers/event.controller.js';
 import * as eventValidation from '../../middleware/validations/event.js';
 import * as partnerProfileMiddleware from '../../middleware/partnerProfile.js';
 import * as eventMiddleware from '../../middleware/event.js';

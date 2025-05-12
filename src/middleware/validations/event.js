@@ -35,6 +35,12 @@ const eventSchema = Joi.object({
   benefitIds: Joi.array().items(Joi.string().uuid()).min(1).required(),
 });
 
+
+const submitRegistrationSchema = Joi.object({
+  formId: Joi.string().uuid().required(),
+  answers: Joi.object().required()
+});
+
 /**
  * Memproses array dari form-data
  * @param {any} value - Nilai yang akan diproses
@@ -98,3 +104,19 @@ export const validateEventUpdate = async (req, res, next) => {
     });
   }
 };
+
+export const validateSubmitRegistration = async (req, res, next) => {
+  try {
+    await submitRegistrationSchema.validateAsync(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+
+    next();
+  } catch (error) {
+     return res.status(400).json({
+      message: 'Terjadi kesalahan',
+      errors: generateJoiError(error),
+    });
+  }
+}

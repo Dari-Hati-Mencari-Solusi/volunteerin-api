@@ -1,6 +1,11 @@
 import prisma from '../configs/dbConfig.js';
 import { HttpError } from '../utils/error.js';
 
+// No filtering
+export const getEvents = async () => {
+  return prisma.event.findMany();
+} 
+
 export const getAllEvents = async (query = {}) => {
   const {
     page = 1,
