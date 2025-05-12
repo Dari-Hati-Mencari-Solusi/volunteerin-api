@@ -35,6 +35,7 @@ model User {
   notifications  Notification[]
   bookmarkEvents UserSavedEvent[]
   benefits       Benefit[]
+  forms          FormResponse[]
 
   @@map("users")
 }
@@ -157,7 +158,7 @@ model Event {
   userSavedEvents UserSavedEvent[]
   participations  Participant[]
   forms           Form[]
-  benefits Benefit[]
+  benefits        Benefit[]
 
   @@index([title])
   @@map("events")
@@ -199,7 +200,7 @@ model Benefit {
   createdAt DateTime? @map("created_at")
   updatedAt DateTime? @default(now()) @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id])
+  user   User    @relation(fields: [userId], references: [id])
   events Event[]
 
   @@map("benefits")
@@ -228,9 +229,25 @@ model Form {
   createdAt DateTime? @map("created_at")
   updatedAt DateTime? @default(now()) @map("updated_at")
 
-  event Event @relation(fields: [eventId], references: [id])
+  event        Event          @relation(fields: [eventId], references: [id])
+  formResposes FormResponse[]
 
   @@map("forms")
+}
+
+model FormResponse {
+  id      String @id @default(uuid()) @db.Uuid
+  formId  String @map("form_id") @db.Uuid
+  userId  String @map("user_id") @db.Uuid
+  answers Json   @db.JsonB
+
+  submittedAt DateTime? @map("submitted_at")
+  updatedAt   DateTime? @default(now()) @map("updated_at")
+
+  form Form @relation(fields: [formId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("form_responses")
 }
 
 model Notification {
