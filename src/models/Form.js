@@ -1,9 +1,12 @@
 import prisma from '../configs/dbConfig.js';
 
 export const createForm = async (data) => {
-  const form = await prisma.form.create({ data });
-  return form;
+  return await prisma.form.create({ data });
 };
+
+export const createForms = async (data) => {
+  return await prisma.form.createMany({ data });
+}
 
 export const getAllForms = async () => {
   return prisma.form.findMany({
@@ -23,7 +26,7 @@ export const getFormById = async (id) => {
 };
 
 export const getFormsByEventId = async (eventId) => {
-  return prisma.form.findMany({
+  return prisma.form.findFirst({
     where: { eventId },
     include: {
       event: true,
