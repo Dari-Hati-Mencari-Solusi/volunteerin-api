@@ -10,6 +10,7 @@ import partnerForms from './partner/form.route.js';
 import benefits from './benefit.route.js';
 import partnerEvents from './partner/event.route.js';
 import adminUsers from './admin/user.route.js';
+import partnerRegistrant from "./partner/registrant.route.js";
 
 export default (app) => {
   const router = Router();
@@ -29,6 +30,7 @@ export default (app) => {
   // Partner Route
   partnerEvents(router);
   partnerForms(router);
+  partnerRegistrant(router);
 
   // Admin Route
   adminUsers(router);
