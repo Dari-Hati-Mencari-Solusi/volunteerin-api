@@ -26,6 +26,15 @@ export default async () => {
     },
   ];
 
+  const volunteerUsers = Array.from({ length: 15 }).map((_, index) => ({
+    name: fakerID.person.fullName(),
+    email: fakerID.internet.email({ provider: 'gmail.com' }),
+    phoneNumber: `628123416${1000 + index}`,
+    password: hashPw,
+    role: 'VOLUNTEER',
+    verifiedAt: now,
+  }));
+
   // Create 5 partner users
   const partnerUsers = Array.from({ length: 5 }).map((_, index) => ({
     name: fakerID.company.name(),
@@ -37,7 +46,7 @@ export default async () => {
   }));
 
   // Combine all users
-  const userData = [...basicUsers, ...partnerUsers];
+  const userData = [...volunteerUsers, ...basicUsers, ...partnerUsers];
 
   await createUsers(userData);
   console.log('Data user berhasil di-seed: 1 volunteer, 5 partners, 1 admin');
