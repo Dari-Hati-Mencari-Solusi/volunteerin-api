@@ -5,6 +5,7 @@ import eventSeeder from './event.seeder.js';
 import partnerProfileSeeder from './partnerProfile.seeder.js';
 import responsiblePersonSeeder from './responsiblePerson.seeder.js';
 import formSeeder from './form.seeder.js';
+import formResponseSeeder from './formResponse.seeder.js';
 
 const seed = async () => {
   try {
@@ -30,7 +31,9 @@ const seed = async () => {
 
     await formSeeder();
     console.log('✅ Form seeder selesai');
-
+    
+    await formResponseSeeder();
+    console.log('✅ Form Response seeder selesai');
 
     console.log('Semua seeder berhasil dijalankan ✅');
   } catch (error) {

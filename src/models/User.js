@@ -1,6 +1,9 @@
 import prisma from '../configs/dbConfig.js';
 import { filterAllowedRelation } from '../utils/object.js';
 
+export const getUsersOriginal = async () => {
+  return prisma.user.findMany();
+}
 export const getUsers = async ({s: search, role, page, limit, sort}) => {
   role = role?.toUpperCase(role);
   
