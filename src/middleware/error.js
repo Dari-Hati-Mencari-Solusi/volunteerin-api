@@ -19,7 +19,7 @@ const errorHandler = (err, _req, res, _next) => {
   if (err instanceof Error) {
     const debug = process.env.APP_DEBUG;
     
-    if (debug == 'true') {
+    if (debug === 'true') {
       console.log(err)  
     }
 
