@@ -17,6 +17,12 @@ const errorHandler = (err, _req, res, _next) => {
   }
 
   if (err instanceof Error) {
+    const debug = process.env.APP_DEBUG;
+    
+    if (debug == 'true') {
+      console.log(err)  
+    }
+
     res
       .status(statusCode)
       .json({ message: 'Terjadi kesalahan server, coba lagi nanti' });
