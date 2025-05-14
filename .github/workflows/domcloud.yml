@@ -16,7 +16,7 @@ jobs:
           webhook_auth: ${{ secrets.WEBHOOK_AUTH }}
           data: >-
             {"commands":["git pull origin main","NPM=`which npm`","$NPM
-            install","npm run db:migrate:deploy","npm run
+            install","npm run db:migrate:prod","npm run
             db:generate","restart"],"features":["node
             lts"],"nginx":{"root":"public_html/public","passenger":{"enabled":"on","app_env":"production","app_start_command":"env
             PORT=$PORT node app.js"}}}
