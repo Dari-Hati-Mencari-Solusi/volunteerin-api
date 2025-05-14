@@ -25,12 +25,12 @@ export const register = async (req, res, next) => {
     const payload = { id: user.id };
     const token = generateToken(payload, '30m');
 
-    const sender = {
-      address: 'hello@demomailtrap.com',
-      name: 'Volunteerin',
-    };
+    // const sender = {
+    //   address: 'hello@demomailtrap.com',
+    //   name: 'Volunteerin',
+    // };
 
-    const recipients = ['volunteerinbusiness@gmail.com'];
+    const recipients = user.email;
     const verifyUrl = `${process.env.FE_BASE_URL}/verify-email?t=${token}`;
     const subject = `Verifikasi Akun Volunteerin ${role === 'PARTNER' ? 'Partner' : ''} kamu`;
 
@@ -40,7 +40,6 @@ export const register = async (req, res, next) => {
     );
 
     await sendEmail(
-      sender,
       recipients,
       subject,
       htmlContent
@@ -116,12 +115,7 @@ export const resendEmailVerification = async (req, res, next) => {
     const payload = { id: user.id };
     const token = generateToken(payload, '30m');
 
-    const sender = {
-      address: 'hello@demomailtrap.com',
-      name: 'Volunteerin',
-    };
-
-    const recipients = ['volunteerinbusiness@gmail.com'];
+    const recipients = user.email;
     const verifyUrl = `${process.env.FE_BASE_URL}/verify-email?t=${token}`;
     const subject = `Verifikasi Akun Volunteerin ${user.role === 'PARTNER' ? 'Partner' : ''} kamu`;
 
@@ -131,7 +125,6 @@ export const resendEmailVerification = async (req, res, next) => {
     );
 
     await sendEmail(
-      sender,
       recipients,
       subject,
       htmlContent
@@ -153,11 +146,7 @@ export const forgotPassword = async (req, res, next) => {
     const payload = { id: user.id };
     const token = generateToken(payload, '30m');
 
-    const sender = {
-      address: 'hello@demomailtrap.com',
-      name: 'Volunteerin',
-    };
-    const recipients = ['volunteerinbusiness@gmail.com'];
+    const recipients = user.email;
     const resetPwUrl = `${process.env.FE_BASE_URL}/reset-pw?t=${token}`;
     const subject = `Reset Password`;
     const htmlContent = await ejs.renderFile(
@@ -165,7 +154,6 @@ export const forgotPassword = async (req, res, next) => {
       { name: user.name, resetPwUrl }
     );
     await sendEmail(
-      sender,
       recipients,
       subject,
       htmlContent,
