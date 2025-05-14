@@ -4,7 +4,7 @@ import { HttpError } from '../utils/error.js';
 // No filtering
 export const getEvents = async () => {
   return prisma.event.findMany();
-} 
+};
 
 export const getAllEvents = async (query = {}) => {
   const {
@@ -121,21 +121,12 @@ export const getAllEvents = async (query = {}) => {
 };
 
 export const getEventsByUserId = async (userId, query = {}) => {
-  const {
-    page = 1,
-    limit = 10,
-    name = '',
-    category = '',
-    start,
-    end,
-    publish,
-  } = query;
+  const { page = 1, limit = 10, name = '', category = '', start, end } = query;
 
   const skip = (page - 1) * limit;
 
   let whereClause = {
     userId,
-    isRelease: true,
   };
 
   if (name) {
@@ -180,10 +171,6 @@ export const getEventsByUserId = async (userId, query = {}) => {
     };
   }
 
-  if (publish !== undefined) {
-    whereClause.isRelease = publish === '1';
-  }
-
   const total = await prisma.event.count({
     where: whereClause,
   });
@@ -195,6 +182,14 @@ export const getEventsByUserId = async (userId, query = {}) => {
         select: {
           id: true,
           name: true,
+        },
+      },
+      benefits: {
+        select: {
+          id: true,
+          name: true,
+          icon: true,
+          description: true,
         },
       },
     },

@@ -90,11 +90,7 @@ export const reviewRegistrant = async (req, res, next) => {
       eventModel.getEventById(eventId),
     ]);
 
-    const sender = {
-      address: 'hello@demomailtrap.com',
-      name: 'Admin Volunteerin',
-    };
-    const recipients = ['volunteerinbusiness@gmail.com'];
+    const recipients = participantDetail.email;
     const subject =
       status === 'ACCEPTED'
         ? `Selamat! Kamu Diterima sebagai Volunteer di ${event.title}`
@@ -115,7 +111,7 @@ export const reviewRegistrant = async (req, res, next) => {
       emailData,
     );
 
-    await sendEmail(sender, recipients, subject, htmlContent);
+    await sendEmail(recipients, subject, htmlContent);
 
     return res.status(200).json({
       message: 'Berhasil mereview pendaftar',
