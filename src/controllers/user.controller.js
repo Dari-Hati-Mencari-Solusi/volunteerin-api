@@ -102,11 +102,7 @@ export const reviewPartnerUser = async (req, res, next) => {
     
     
     // Send mail
-    const sender = {
-      address: 'hello@demomailtrap.com',
-      name: 'Admin Volunteerin',
-    };
-    const recipients = ['volunteerinbusiness@gmail.com'];
+    const recipients = user.email;
     const subject = EMAIL_SUBJECTS[reviewResult];
 
     const dashboardPartnerUrl = `${process.env.FE_BASE_URL}/dashboard/partner`;
@@ -126,7 +122,7 @@ export const reviewPartnerUser = async (req, res, next) => {
       emailData,
     );
 
-    await sendEmail(sender, recipients, subject, htmlContent);
+    await sendEmail(recipients, subject, htmlContent);
 
     const message = REVIEW_MESSAGES[reviewResult] || REVIEW_MESSAGES.REJECTED;
     return res.status(200).json({
