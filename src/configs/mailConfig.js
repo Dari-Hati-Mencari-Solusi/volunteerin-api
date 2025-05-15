@@ -4,7 +4,8 @@ import mailjet from 'node-mailjet';
 // import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 export const sendEmail = async (recipients, subject, htmlContent) => {
-  const { APP_ENV, MAIL_API_KEY, MJ_APIKEY_PUBLIC, MJ_APIKEY_PRIVATE } = process.env;
+  const { APP_ENV, MAIL_API_KEY, MJ_APIKEY_PUBLIC, MJ_APIKEY_PRIVATE } =
+    process.env;
   const sender = 'noreply@volunteerin.id';
 
   try {
@@ -36,29 +37,22 @@ export const sendEmail = async (recipients, subject, htmlContent) => {
 
       // await ses.send(command);
 
-      const mj = mailjet.apiConnect(
-        MJ_APIKEY_PUBLIC,
-        MJ_APIKEY_PRIVATE
-      );
-
-      await mj.post('send', { version: 'v3.1' }).request({
-        Messages: [
-          {
-            From: {
-              Email: sender,
-              Name: 'Volunteerin',
-            },
-            To: [
-              {
-                Email: recipients,
-              },
-            ],
-            Subject: subject,
-            HTMLPart: htmlContent,
-          },
-        ],
+      const transport = nodemailer.createTransport({
+        host: 'in-v3.mailjet.com',
+        port: 587,
+        secure: false, // pakai true jika port 465
+        auth: {
+          user: MJ_APIKEY_PUBLIC,
+          pass: MJ_APIKEY_PRIVATE,
+        },
       });
 
+      await transport.sendMail({
+        from: `"Volunteerin" <${sender}>`,
+        to: recipients,
+        subject,
+        html: htmlContent,
+      });
     } else {
       const transport = nodemailer.createTransport(
         MailtrapTransport({
