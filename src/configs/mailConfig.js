@@ -5,7 +5,7 @@ import mailjet from 'node-mailjet';
 
 export const sendEmail = async (recipients, subject, htmlContent) => {
   const { APP_ENV, MAIL_API_KEY, MJ_APIKEY_PUBLIC, MJ_APIKEY_PRIVATE } = process.env;
-  const sender = 'volunteerinbusiness@gmail.com';
+  const sender = 'noreply@volunteerin.id';
 
   try {
     if (APP_ENV === 'production') {
