@@ -8,6 +8,7 @@ import { HttpError } from '../../utils/error.js';
 import { sendEmail } from '../../configs/mailConfig.js';
 import ejs from 'ejs';
 import path from 'path';
+import { MAIL } from '../../constants/index.js';
 
 export const showRegistrantsList = async (req, res, next) => {
   try {
@@ -82,19 +83,12 @@ export const reviewRegistrant = async (req, res, next) => {
       participantModel.createParticipant(participantData),
     ]);
 
-    
-
     // Email config and sending
     const [participantDetail, event] = await Promise.all([
       userModel.getUserById(registrantExist.userId),
       eventModel.getEventById(eventId),
     ]);
 
-    const recipients = participantDetail.email;
-    const subject =
-      status === 'ACCEPTED'
-        ? `Selamat! Kamu Diterima sebagai Volunteer di ${event.title}`
-        : `Terima Kasih Telah Mendaftar di ${event.title}`;
     const emailData = {
       titleEvent: event.title,
       name: participantDetail.name,
@@ -103,15 +97,23 @@ export const reviewRegistrant = async (req, res, next) => {
       status: status.toLowerCase(),
     };
 
-    const htmlContent = await ejs.renderFile(
-      path.join(
-        process.cwd(),
-        './src/views/emails/registrant-approval-status.ejs',
+    const mailData = {
+      sender: MAIL.SENDER,
+      recipients: [participantDetail.email],
+      subject:
+        status === 'ACCEPTED'
+          ? `Selamat! Kamu Diterima sebagai Volunteer di ${event.title}`
+          : `Terima Kasih Telah Mendaftar di ${event.title}`,
+      htmlContent: await ejs.renderFile(
+        path.join(
+          process.cwd(),
+          './src/views/emails/registrant-approval-status.ejs',
+        ),
+        emailData,
       ),
-      emailData,
-    );
+    };
 
-    await sendEmail(recipients, subject, htmlContent);
+    await sendEmail(mailData);
 
     return res.status(200).json({
       message: 'Berhasil mereview pendaftar',
