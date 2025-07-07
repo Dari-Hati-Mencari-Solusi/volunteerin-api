@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node app.js",
-    "husky": "husky install",
+    "husky": "husky init",
     "start:dev": "nodemon app.js",
     "format": "prettier --write .",
     "lint": "eslint .",
@@ -25,7 +25,10 @@
   "description": "platform to connect volunteers with communities",
   "_moduleAliases": {},
   "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown"
+    "**/*": [
+      "prettier --write --ignore-unknown",
+      "eslint --fix"
+    ]
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.808.0",
