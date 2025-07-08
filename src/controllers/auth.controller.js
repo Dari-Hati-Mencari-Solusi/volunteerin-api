@@ -1,11 +1,12 @@
-import path from "path";
+import path from 'path';
 import { sendEmail } from '../configs/mailConfig.js';
 import * as userModel from '../models/User.js';
 import * as cryptos from '../utils/crypto.js';
-import ejs from "ejs";
+import ejs from 'ejs';
 import jwt from 'jsonwebtoken';
 import { HttpError } from '../utils/error.js';
 import { generateToken } from '../utils/jwt.js';
+import { MAIL } from '../constants/index.js';
 
 export const register = async (req, res, next) => {
   const { name, email, password, phoneNumber, role } = req.body;
@@ -25,25 +26,18 @@ export const register = async (req, res, next) => {
     const payload = { id: user.id };
     const token = generateToken(payload, '30m');
 
-    // const sender = {
-    //   address: 'hello@demomailtrap.com',
-    //   name: 'Volunteerin',
-    // };
-
-    const recipients = user.email;
     const verifyUrl = `${process.env.FE_BASE_URL}/verify-email?t=${token}`;
-    const subject = `Verifikasi Akun Volunteerin ${role === 'PARTNER' ? 'Partner' : ''} kamu`;
+    const mailData = {
+      sender: MAIL.SENDER,
+      recipients: [user.email],
+      subject: `Verifikasi Akun Volunteerin ${role === 'PARTNER' ? 'Partner' : ''} kamu`,
+      htmlContent: await ejs.renderFile(
+        path.join(process.cwd(), './src/views/emails/email-verification.ejs'),
+        { name: user.name, verifyUrl },
+      ),
+    };
 
-    const htmlContent = await ejs.renderFile(
-      path.join(process.cwd(), "./src/views/emails/email-verification.ejs"),
-      { name: user.name, verifyUrl }
-    );
-
-    await sendEmail(
-      recipients,
-      subject,
-      htmlContent
-    );
+    await sendEmail(mailData);
 
     res.status(200).json({
       message: 'Akun berhasil dibuat',
@@ -115,20 +109,18 @@ export const resendEmailVerification = async (req, res, next) => {
     const payload = { id: user.id };
     const token = generateToken(payload, '30m');
 
-    const recipients = user.email;
     const verifyUrl = `${process.env.FE_BASE_URL}/verify-email?t=${token}`;
-    const subject = `Verifikasi Akun Volunteerin ${user.role === 'PARTNER' ? 'Partner' : ''} kamu`;
+    const mailData = {
+      sender: MAIL.SENDER,
+      recipients: [user.email],
+      subject: `Verifikasi Akun Volunteerin ${user.role === 'PARTNER' ? 'Partner' : ''} kamu`,
+      htmlContent: await ejs.renderFile(
+        path.join(process.cwd(), './src/views/emails/email-verification.ejs'),
+        { name: user.name, verifyUrl },
+      ),
+    };
 
-    const htmlContent = await ejs.renderFile(
-      path.join(process.cwd(), "./src/views/emails/email-verification.ejs"),
-      { name: user.name, verifyUrl }
-    );
-
-    await sendEmail(
-      recipients,
-      subject,
-      htmlContent
-    );
+    await sendEmail(mailData);
 
     res.status(200).json({
       message:
@@ -146,18 +138,17 @@ export const forgotPassword = async (req, res, next) => {
     const payload = { id: user.id };
     const token = generateToken(payload, '30m');
 
-    const recipients = user.email;
     const resetPwUrl = `${process.env.FE_BASE_URL}/reset-pw?t=${token}`;
-    const subject = `Reset Password`;
-    const htmlContent = await ejs.renderFile(
-      path.join(process.cwd(), "./src/views/emails/reset-password.ejs"),
-      { name: user.name, resetPwUrl }
-    );
-    await sendEmail(
-      recipients,
-      subject,
-      htmlContent,
-    );
+    const mailData = {
+      sender: MAIL.SENDER,
+      recipients: [user.email],
+      subject: 'Reset Password',
+      htmlContent: await ejs.renderFile(
+        path.join(process.cwd(), './src/views/emails/reset-password.ejs'),
+        { name: user.name, resetPwUrl },
+      ),
+    };
+    await sendEmail(mailData);
 
     res.status(200).json({
       message: 'Link reset password telah dikirim di email Anda.',

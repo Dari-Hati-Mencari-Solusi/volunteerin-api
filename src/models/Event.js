@@ -125,49 +125,35 @@ export const getEventsByUserId = async (userId, query = {}) => {
 
   const skip = (page - 1) * limit;
 
-  let whereClause = {
-    userId,
-  };
+  let whereClause = { userId };
 
   if (name) {
-    whereClause = {
-      ...whereClause,
-      title: {
-        contains: name,
-        mode: 'insensitive',
-      },
+    whereClause.title = {
+      contains: name,
+      mode: 'insensitive',
     };
   }
 
   if (category) {
-    whereClause = {
-      ...whereClause,
-      categories: {
-        some: {
-          name: {
-            contains: category,
-            mode: 'insensitive',
-          },
+    whereClause.categories = {
+      some: {
+        name: {
+          contains: category,
+          mode: 'insensitive',
         },
       },
     };
   }
 
   if (start) {
-    whereClause = {
-      ...whereClause,
-      startAt: {
-        gte: new Date(start),
-      },
+    whereClause.startAt = {
+      gte: new Date(start),
     };
   }
 
   if (end) {
-    whereClause = {
-      ...whereClause,
-      endAt: {
-        lte: new Date(end),
-      },
+    whereClause.endAt = {
+      lte: new Date(end),
     };
   }
 
