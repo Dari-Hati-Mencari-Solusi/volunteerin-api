@@ -101,14 +101,14 @@ export const getRegistrantById = async (registrantId) => {
     user: {
       include: {
         profile: true,
-        participations: includeHistoryJoinedEvent
-      }
-    }
-  }
+        participations: includeHistoryJoinedEvent,
+      },
+    },
+  };
 
   return prisma.formResponse.findUnique({
     where: { id: formResponseId },
-    include: includeWith
+    include: includeWith,
   });
 };
 
@@ -117,4 +117,19 @@ export const updateRegistrantById = async (id, data) => {
     where: { id },
     data,
   });
-}
+};
+
+export const getEventRegistrationByUserId = async (userId) => {
+  return prisma.formResponse.findMany({
+    where: {
+      userId,
+    },
+    include: {
+      form: {
+        include: {
+          event: true,
+        },
+      },
+    },
+  });
+};

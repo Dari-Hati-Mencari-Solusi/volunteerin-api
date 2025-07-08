@@ -247,31 +247,35 @@ export const showRegistrationForm = async (req, res, next) => {
   try {
     const { id: userId } = req.params;
     const { id: eventId } = req.params;
-  
+
     if (!isUUID(eventId)) {
       throw new HttpError('ID tidak valid', 400);
     }
-    
+
     const form = await formModel.getFormsByEventId(eventId);
 
     if (!form) {
       throw new HttpError('Formulir tidak ditemukan untuk event ini.', 404);
     }
 
-    const hasSubmitted = await formResponseModel.getFormResponseByFormIdAndUserId(form.id, userId);
+    const hasSubmitted =
+      await formResponseModel.getFormResponseByFormIdAndUserId(form.id, userId);
 
     if (hasSubmitted) {
-      throw new HttpError('Kamu sudah mengisi formulir untuk event ini sebelumnya.', 409);
+      throw new HttpError(
+        'Kamu sudah mengisi formulir untuk event ini sebelumnya.',
+        409,
+      );
     }
-    
+
     return res.status(200).json({
-      message: "Berhasil menampilkan formulir pendaftaran event",
-      data: form
+      message: 'Berhasil menampilkan formulir pendaftaran event',
+      data: form,
     });
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const submitRegistration = async (req, res, next) => {
   try {
@@ -287,26 +291,46 @@ export const submitRegistration = async (req, res, next) => {
       throw new HttpError('Formulir tidak ditemukan untuk event ini.', 404);
     }
 
-    const hasSubmitted = await formResponseModel.getFormResponseByFormIdAndUserId(form.id, userId);
+    const hasSubmitted =
+      await formResponseModel.getFormResponseByFormIdAndUserId(form.id, userId);
 
     if (hasSubmitted) {
-      throw new HttpError('Kamu sudah mengisi formulir untuk event ini sebelumnya.', 409);
+      throw new HttpError(
+        'Kamu sudah mengisi formulir untuk event ini sebelumnya.',
+        409,
+      );
     }
 
     const data = {
       ...req.body,
       userId,
-      submittedAt: new Date()
-    } 
+      submittedAt: new Date(),
+    };
     const formResponse = await formResponseModel.createFormResponse(data);
 
     return res.status(200).json({
-      message: "Pendaftaran berhasil! Silakan menunggu konfirmasi dari penyelenggara. Kami akan segera mengabari setelah proses review selesai.",
-      data: formResponse
+      message:
+        'Pendaftaran berhasil! Silakan menunggu konfirmasi dari penyelenggara. Kami akan segera mengabari setelah proses review selesai.',
+      data: formResponse,
     });
-
   } catch (error) {
-    console.log(error)
     next(error);
   }
-}
+};
+
+export const getUserEventHistory = async (req, res, next) => {
+  const { user } = req;
+
+  try {
+    const eventHistories = await formResponseModel.getEventRegistrationByUserId(
+      user.id,
+    );
+
+    res.status(200).json({
+      message: 'Data events berhasil didapatkan',
+      data: eventHistories,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
