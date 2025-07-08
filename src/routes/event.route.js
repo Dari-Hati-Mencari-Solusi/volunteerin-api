@@ -12,6 +12,12 @@ export default (app) => {
   router.get('/', eventController.getAllEvents);
 
   router.get(
+    '/histories',
+    authMiddleware.isAuthenticate,
+    eventController.getUserEventHistory,
+  );
+
+  router.get(
     '/:id',
     eventMiddleware.ensureEventIsReleased,
     eventController.getEvent,
