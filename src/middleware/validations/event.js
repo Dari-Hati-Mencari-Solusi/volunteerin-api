@@ -10,14 +10,15 @@ const eventSchema = Joi.object({
   title: Joi.string().max(100).required(),
   type: Joi.string()
     .valid(...Object.values(EventType))
-    .default('OPEN'),
+    .default('OPEN')
+    .required(),
   description: Joi.string().required(),
   requirement: Joi.string().required(),
   contactPerson: Joi.string().max(15).required(),
-  maxApplicant: Joi.number().integer().allow(null),
-  acceptedQuota: Joi.number().integer().allow(null),
+  maxApplicant: Joi.number().integer().optional(),
+  acceptedQuota: Joi.number().integer().optional(),
   startAt: Joi.date().iso().required(),
-  endAt: Joi.date().iso().allow(null),
+  endAt: Joi.date().iso().required(),
   isPaid: Joi.boolean().default(false),
   price: Joi.when('isPaid', {
     is: true,
@@ -26,19 +27,18 @@ const eventSchema = Joi.object({
   }),
   province: Joi.string().max(50).required(),
   regency: Joi.string().max(50).required(),
-  address: Joi.string().allow(null, ''),
-  gmaps: Joi.string().allow(null, ''),
-  latitude: Joi.number().precision(8).allow(null),
-  longitude: Joi.number().precision(8).allow(null),
-  isRelease: Joi.boolean().default(false),
+  address: Joi.string().required(),
+  gmaps: Joi.string().optional(),
+  latitude: Joi.number().precision(8).optional(),
+  longitude: Joi.number().precision(8).optional(),
+  isRelease: Joi.boolean().default(false).required(),
   categoryIds: Joi.array().items(Joi.string().uuid()).min(1).required(),
   benefitIds: Joi.array().items(Joi.string().uuid()).min(1).required(),
 });
 
-
 const submitRegistrationSchema = Joi.object({
   formId: Joi.string().uuid().required(),
-  answers: Joi.object().required()
+  answers: Joi.object().required(),
 });
 
 /**
@@ -50,7 +50,7 @@ const processArrayFromFormData = (value) => {
   if (typeof value === 'string') {
     try {
       return JSON.parse(value);
-    } catch (e) {
+    } catch (_e) {
       return value.split(',');
     }
   }
@@ -114,9 +114,9 @@ export const validateSubmitRegistration = async (req, res, next) => {
 
     next();
   } catch (error) {
-     return res.status(400).json({
+    return res.status(400).json({
       message: 'Terjadi kesalahan',
       errors: generateJoiError(error),
     });
   }
-}
+};
