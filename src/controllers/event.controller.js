@@ -14,28 +14,7 @@ export const createEvent = async (req, res, next) => {
     const { id: userId } = req.user;
     const { benefitIds, categoryIds, ...eventData } = req.body;
 
-    // Validasi input
-    if (!benefitIds || benefitIds.length === 0) {
-      return res.status(400).json({
-        message: 'Manfaat event tidak boleh kosong',
-      });
-    }
-
-    if (!categoryIds || categoryIds.length === 0) {
-      return res.status(400).json({
-        message: 'Kategori tidak boleh kosong',
-      });
-    }
-
-    // Upload banner image
-    let uploadResponse = null;
-    if (req.file) {
-      uploadResponse = await uploadToImageKit(req.file);
-    } else {
-      return res.status(400).json({
-        message: 'Banner event tidak boleh kosong',
-      });
-    }
+    let uploadResponse = await uploadToImageKit(req.file);
 
     // Konversi tipe data
     const eventDataProcessed = {
@@ -49,8 +28,8 @@ export const createEvent = async (req, res, next) => {
       isPaid: eventData.isPaid === 'true' || eventData.isPaid === true,
       isRelease: eventData.isRelease === 'true' || eventData.isRelease === true,
       price: eventData.price ? parseFloat(eventData.price) : 0,
-      latitude: eventData.latitude ? parseFloat(eventData.latitude) : null,
-      longitude: eventData.longitude ? parseFloat(eventData.longitude) : null,
+      latitude: eventData.latitude ?? null,
+      longitude: eventData.longitude ?? null,
     };
 
     // Prepare event data
@@ -66,8 +45,8 @@ export const createEvent = async (req, res, next) => {
     // Create event with categories and save benefitIds as data
     let event = await eventModel.createEvent({
       ...eventDataToCreate,
-      categoryIds: categoryIds,
-      benefitIds: benefitIds,
+      categoryIds,
+      benefitIds,
     });
 
     res.status(201).json({

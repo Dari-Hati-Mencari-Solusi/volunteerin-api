@@ -140,12 +140,12 @@ model Event {
   isPaid Boolean? @default(false) @map("is_paid")
   price  Decimal? @default(0) @db.Decimal(12, 2)
 
-  province  String   @db.VarChar(50)
-  regency   String   @db.VarChar(50)
+  province  String  @db.VarChar(50)
+  regency   String  @db.VarChar(50)
   address   String?
   gmaps     String?
-  latitude  Decimal? @db.Decimal(10, 8)
-  longitude Decimal? @db.Decimal(11, 8)
+  latitude  String?
+  longitude String?
 
   bannerImageId String?   @map("banner_image_id")
   bannerUrl     String    @map("banner_url")
@@ -207,18 +207,17 @@ model Benefit {
 }
 
 model Participant {
-  id          String            @id @default(uuid()) @db.Uuid
-  userId      String            @map("user_id") @db.Uuid
-  eventId     String            @map("event_id") @db.Uuid
-  formResponseId String @unique @map("form_response_id") @db.Uuid
-  completedAt DateTime?         @map("completed_at")
-  createdAt   DateTime?         @map("created_at")
-  updatedAt   DateTime?         @default(now()) @map("updated_at")
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  eventId        String    @map("event_id") @db.Uuid
+  formResponseId String    @unique @map("form_response_id") @db.Uuid
+  completedAt    DateTime? @map("completed_at")
+  createdAt      DateTime? @map("created_at")
+  updatedAt      DateTime? @default(now()) @map("updated_at")
 
-  user  User  @relation(fields: [userId], references: [id])
-  event Event @relation(fields: [eventId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+  event        Event        @relation(fields: [eventId], references: [id])
   formResponse FormResponse @relation(fields: [formResponseId], references: [id])
-  
 
   @@map("participants")
 }
@@ -238,17 +237,17 @@ model Form {
 }
 
 model FormResponse {
-  id      String @id @default(uuid()) @db.Uuid
-  formId  String @map("form_id") @db.Uuid
-  userId  String @map("user_id") @db.Uuid
-  answers Json   @db.JsonB
-  status      RegistrantStatus @default(REVIEWED)
+  id      String           @id @default(uuid()) @db.Uuid
+  formId  String           @map("form_id") @db.Uuid
+  userId  String           @map("user_id") @db.Uuid
+  answers Json             @db.JsonB
+  status  RegistrantStatus @default(REVIEWED)
 
   submittedAt DateTime? @map("submitted_at")
   updatedAt   DateTime? @default(now()) @map("updated_at")
 
-  form Form @relation(fields: [formId], references: [id])
-  user User @relation(fields: [userId], references: [id])
+  form        Form         @relation(fields: [formId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
   participant Participant?
 
   @@map("form_responses")

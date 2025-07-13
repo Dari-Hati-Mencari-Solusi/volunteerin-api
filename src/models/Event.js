@@ -227,57 +227,25 @@ export const getEventById = async (id) => {
 };
 
 export const createEvent = async (data) => {
-  try {
-    const { categoryIds, benefitIds, ...eventData } = data;
+  const { categoryIds, benefitIds, ...eventData } = data;
 
-    const event = await prisma.event.create({
-      data: {
-        ...eventData,
-        maxApplicant: eventData.maxApplicant
-          ? Number(eventData.maxApplicant)
-          : null,
-        acceptedQuota: eventData.acceptedQuota
-          ? Number(eventData.acceptedQuota)
-          : null,
-        isPaid:
-          typeof eventData.isPaid === 'string'
-            ? eventData.isPaid === 'true'
-            : !!eventData.isPaid,
-        price: eventData.price ? Number(eventData.price) : 0,
-        latitude: eventData.latitude ? Number(eventData.latitude) : null,
-        longitude: eventData.longitude ? Number(eventData.longitude) : null,
-        isRelease:
-          typeof eventData.isRelease === 'string'
-            ? eventData.isRelease === 'true'
-            : !!eventData.isRelease,
-        categories:
-          categoryIds && categoryIds.length > 0
-            ? {
-                connect: categoryIds.map((id) => ({ id })),
-              }
-            : undefined,
-        benefits:
-          benefitIds && benefitIds.length > 0
-            ? {
-                connect: benefitIds.map((id) => ({ id })),
-              }
-            : undefined,
+  const event = await prisma.event.create({
+    data: {
+      ...eventData,
+      categories: {
+        connect: categoryIds.map((id) => ({ id })),
       },
-      include: {
-        categories: true,
-        benefits: true,
+      benefits: {
+        connect: benefitIds.map((id) => ({ id })),
       },
-    });
+    },
+    include: {
+      categories: true,
+      benefits: true,
+    },
+  });
 
-    return {
-      ...event,
-    };
-  } catch (error) {
-    if (error.code === 'P2002') {
-      throw new HttpError('Event dengan judul tersebut sudah ada', 400);
-    }
-    throw error;
-  }
+  return event;
 };
 
 export const updateEventById = async (id, data) => {
