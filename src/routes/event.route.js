@@ -11,8 +11,6 @@ export default (app) => {
 
   router.get('/', eventController.getAllEvents);
 
-  router.get('/recommendations', eventController.getRecommendedEvents);
-
   router.get(
     '/histories',
     authMiddleware.isAuthenticate,

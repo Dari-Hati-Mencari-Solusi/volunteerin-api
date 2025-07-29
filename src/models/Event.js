@@ -15,6 +15,11 @@ export const getAllEvents = async (query = {}) => {
     start,
     end,
     publish,
+    latitude,
+    longitude,
+    maxDistance = 50,
+    sortBy = 'newest',
+    isPaid,
   } = query;
 
   const skip = (page - 1) * limit;
@@ -72,9 +77,45 @@ export const getAllEvents = async (query = {}) => {
     };
   }
 
-  const total = await prisma.event.count({
-    where: whereClause,
-  });
+  // Filter berdasarkan event berbayar/gratis
+  if (isPaid !== undefined) {
+    whereClause = {
+      ...whereClause,
+      isPaid: isPaid === '1' || isPaid === 'true',
+    };
+  }
+
+  // Jika ada parameter lokasi, filter event yang memiliki koordinat
+  if (latitude && longitude) {
+    whereClause = {
+      ...whereClause,
+      latitude: { not: null },
+      longitude: { not: null },
+    };
+  }
+
+  let orderBy = {};
+
+  // Set ordering berdasarkan sortBy parameter
+  switch (sortBy) {
+    case 'newest':
+      orderBy = { createdAt: 'desc' };
+      break;
+    case 'oldest':
+      orderBy = { createdAt: 'asc' };
+      break;
+    case 'startDate':
+      orderBy = { startAt: 'asc' };
+      break;
+    case 'endDate':
+      orderBy = { endAt: 'asc' };
+      break;
+    case 'alphabetical':
+      orderBy = { title: 'asc' };
+      break;
+    default:
+      orderBy = { createdAt: 'desc' };
+  }
 
   const events = await prisma.event.findMany({
     where: whereClause,
@@ -102,21 +143,59 @@ export const getAllEvents = async (query = {}) => {
         },
       },
     },
-    skip,
-    take: parseInt(limit),
-    orderBy: {
-      createdAt: 'desc',
-    },
+    orderBy,
   });
 
+  let processedEvents = events;
+
+  // Jika ada parameter lokasi, hitung jarak dan filter berdasarkan radius
+  if (latitude && longitude) {
+    const userLatitude = parseFloat(latitude);
+    const userLongitude = parseFloat(longitude);
+
+    processedEvents = events
+      .map((event) => {
+        const distance = calculateDistance(
+          userLatitude,
+          userLongitude,
+          parseFloat(event.latitude),
+          parseFloat(event.longitude),
+        );
+
+        return {
+          ...event,
+          distance: Math.round(distance * 100) / 100,
+        };
+      })
+      .filter((event) => event.distance <= parseFloat(maxDistance))
+      .sort((a, b) => {
+        if (sortBy === 'distance') {
+          return a.distance - b.distance;
+        }
+        return 0;
+      });
+  }
+
+  // Apply pagination setelah filter dan sorting
+  const total = processedEvents.length;
+  const paginatedEvents = processedEvents.slice(skip, skip + parseInt(limit));
+
   return {
-    events,
+    events: paginatedEvents,
     pagination: {
       total,
       page: parseInt(page),
       limit: parseInt(limit),
       totalPages: Math.ceil(total / limit),
     },
+    ...(latitude &&
+      longitude && {
+        locationFilter: {
+          latitude: parseFloat(latitude),
+          longitude: parseFloat(longitude),
+          maxDistance: parseFloat(maxDistance),
+        },
+      }),
   };
 };
 
@@ -342,100 +421,6 @@ export const deleteEvent = async (id) => {
     }
     throw error;
   }
-};
-
-export const getRecommendedEventsByLocation = async (
-  userLatitude,
-  userLongitude,
-  query = {},
-) => {
-  const { page = 1, limit = 10, maxDistance = 50, category = '' } = query;
-
-  const skip = (page - 1) * limit;
-
-  let whereClause = {
-    isRelease: true,
-    latitude: { not: null },
-    longitude: { not: null },
-  };
-
-  if (category) {
-    whereClause = {
-      ...whereClause,
-      categories: {
-        some: {
-          name: {
-            contains: category,
-            mode: 'insensitive',
-          },
-        },
-      },
-    };
-  }
-
-  const events = await prisma.event.findMany({
-    where: whereClause,
-    include: {
-      categories: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      benefits: {
-        select: {
-          id: true,
-          name: true,
-          icon: true,
-          description: true,
-        },
-      },
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-
-  const eventsWithDistance = events
-    .map((event) => {
-      const distance = calculateDistance(
-        userLatitude,
-        userLongitude,
-        parseFloat(event.latitude),
-        parseFloat(event.longitude),
-      );
-
-      return {
-        ...event,
-        distance: Math.round(distance * 100) / 100,
-      };
-    })
-    .filter((event) => event.distance <= maxDistance)
-    .sort((a, b) => a.distance - b.distance);
-
-  const paginatedEvents = eventsWithDistance.slice(
-    skip,
-    skip + parseInt(limit),
-  );
-  const total = eventsWithDistance.length;
-
-  return {
-    events: paginatedEvents,
-    pagination: {
-      total,
-      page: parseInt(page),
-      limit: parseInt(limit),
-      totalPages: Math.ceil(total / limit),
-    },
-  };
 };
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
