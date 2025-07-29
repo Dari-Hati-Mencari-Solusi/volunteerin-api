@@ -343,3 +343,119 @@ export const deleteEvent = async (id) => {
     throw error;
   }
 };
+
+export const getRecommendedEventsByLocation = async (
+  userLatitude,
+  userLongitude,
+  query = {},
+) => {
+  const { page = 1, limit = 10, maxDistance = 50, category = '' } = query;
+
+  const skip = (page - 1) * limit;
+
+  let whereClause = {
+    isRelease: true,
+    latitude: { not: null },
+    longitude: { not: null },
+  };
+
+  if (category) {
+    whereClause = {
+      ...whereClause,
+      categories: {
+        some: {
+          name: {
+            contains: category,
+            mode: 'insensitive',
+          },
+        },
+      },
+    };
+  }
+
+  const events = await prisma.event.findMany({
+    where: whereClause,
+    include: {
+      categories: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      benefits: {
+        select: {
+          id: true,
+          name: true,
+          icon: true,
+          description: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  const eventsWithDistance = events
+    .map((event) => {
+      const distance = calculateDistance(
+        userLatitude,
+        userLongitude,
+        parseFloat(event.latitude),
+        parseFloat(event.longitude),
+      );
+
+      return {
+        ...event,
+        distance: Math.round(distance * 100) / 100,
+      };
+    })
+    .filter((event) => event.distance <= maxDistance)
+    .sort((a, b) => a.distance - b.distance);
+
+  const paginatedEvents = eventsWithDistance.slice(
+    skip,
+    skip + parseInt(limit),
+  );
+  const total = eventsWithDistance.length;
+
+  return {
+    events: paginatedEvents,
+    pagination: {
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371;
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+
+  return distance;
+};
+
+const toRadians = (degrees) => {
+  return degrees * (Math.PI / 180);
+};
