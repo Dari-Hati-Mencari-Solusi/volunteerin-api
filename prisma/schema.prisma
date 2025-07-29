@@ -259,6 +259,8 @@ model Notification {
   content   String            @db.Text
   type      NotificationTypes
   url       String?           @db.VarChar
+  readAt    DateTime?         @map("read_at")
+  isDeleted Boolean           @default(false) @map("is_deleted")
   createdAt DateTime?         @map("created_at")
   updatedAt DateTime?         @default(now()) @map("updated_at")
   user      User              @relation(fields: [userId], references: [id])
