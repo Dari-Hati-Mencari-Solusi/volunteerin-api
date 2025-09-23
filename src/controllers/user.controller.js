@@ -7,6 +7,12 @@ import ejs from 'ejs';
 import path from 'path';
 import { MAIL } from '../constants/index.js';
 
+/**
+ * Get User List
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
 export const getUsers = async (req, res, next) => {
   try {
     const users = await userModel.getUsers(req.query);
