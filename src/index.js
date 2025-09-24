@@ -5,7 +5,10 @@ import errorHandler from './middleware/error.js';
 import loaders from './loaders/index.js';
 
 const app = express();
-
+/**
+ * thiz iz config
+ * cek
+ */
 dotenv.config();
 
 loaders(app);

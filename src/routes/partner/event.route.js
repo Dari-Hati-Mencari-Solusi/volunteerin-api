@@ -17,14 +17,14 @@ export default (app) => {
     '/events',
     authMiddleware.isAuthenticate,
     accessMiddleware.isPartner,
-    partnerProfileMiddleware.ensurePartnerProfileExists,
+    // partnerProfileMiddleware.ensurePartnerProfileExists,
     uploadMiddleware.uploadSingle(
       'banner',
       '1MB',
       ['image/png', 'image/jpg', 'image/jpeg'],
       'File yang diunggah harus dalam format PNG, JPG, atau JPEG.',
     ),
-    imageMiddleware.maxDimensionOfFile(600, 300),
+    imageMiddleware.maxDimensionOfFile(2000, 900),
     eventValidation.validateEventCreate,
     eventController.createEvent,
   );

@@ -58,10 +58,16 @@ export const getFormById = async (req, res, next) => {
 export const getMyForms = async (req, res, next) => {
   try {
     const { id: partnerId } = req.user;
-    const forms = await formModel.getFormsByPartnerId(partnerId);
+    const { eventId } = req.query;
+
+    let forms = await formModel.getFormsByPartnerId(partnerId);
+
+    if (eventId) {
+      forms = forms.filter((form) => form.eventId === eventId);
+    }
 
     res.status(200).json({
-      message: 'Berhasil mendapatkan daftar forms anda',
+      message: 'Berhasil mendapatkan form anda',
       data: forms,
     });
   } catch (error) {
