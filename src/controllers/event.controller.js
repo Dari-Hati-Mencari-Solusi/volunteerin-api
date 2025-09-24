@@ -14,28 +14,7 @@ export const createEvent = async (req, res, next) => {
     const { id: userId } = req.user;
     const { benefitIds, categoryIds, ...eventData } = req.body;
 
-    // Validasi input
-    if (!benefitIds || benefitIds.length === 0) {
-      return res.status(400).json({
-        message: 'Manfaat event tidak boleh kosong',
-      });
-    }
-
-    if (!categoryIds || categoryIds.length === 0) {
-      return res.status(400).json({
-        message: 'Kategori tidak boleh kosong',
-      });
-    }
-
-    // Upload banner image
-    let uploadResponse = null;
-    if (req.file) {
-      uploadResponse = await uploadToImageKit(req.file);
-    } else {
-      return res.status(400).json({
-        message: 'Banner event tidak boleh kosong',
-      });
-    }
+    let uploadResponse = await uploadToImageKit(req.file);
 
     // Konversi tipe data
     const eventDataProcessed = {
@@ -49,8 +28,8 @@ export const createEvent = async (req, res, next) => {
       isPaid: eventData.isPaid === 'true' || eventData.isPaid === true,
       isRelease: eventData.isRelease === 'true' || eventData.isRelease === true,
       price: eventData.price ? parseFloat(eventData.price) : 0,
-      latitude: eventData.latitude ? parseFloat(eventData.latitude) : null,
-      longitude: eventData.longitude ? parseFloat(eventData.longitude) : null,
+      latitude: eventData.latitude ?? null,
+      longitude: eventData.longitude ?? null,
     };
 
     // Prepare event data
@@ -66,8 +45,8 @@ export const createEvent = async (req, res, next) => {
     // Create event with categories and save benefitIds as data
     let event = await eventModel.createEvent({
       ...eventDataToCreate,
-      categoryIds: categoryIds,
-      benefitIds: benefitIds,
+      categoryIds,
+      benefitIds,
     });
 
     res.status(201).json({
@@ -164,18 +143,59 @@ export const updateEvent = async (req, res, next) => {
 
 export const getAllEvents = async (req, res, next) => {
   try {
+    const { latitude, longitude } = req.query;
+
+    // Validasi koordinat jika disediakan
+    if ((latitude && !longitude) || (!latitude && longitude)) {
+      return res.status(400).json({
+        message: 'Latitude dan longitude harus disediakan bersamaan',
+      });
+    }
+
+    if (latitude && longitude) {
+      const userLatitude = parseFloat(latitude);
+      const userLongitude = parseFloat(longitude);
+
+      if (isNaN(userLatitude) || isNaN(userLongitude)) {
+        return res.status(400).json({
+          message: 'Format latitude atau longitude tidak valid',
+        });
+      }
+
+      if (
+        userLatitude < -90 ||
+        userLatitude > 90 ||
+        userLongitude < -180 ||
+        userLongitude > 180
+      ) {
+        return res.status(400).json({
+          message:
+            'Koordinat latitude atau longitude berada di luar rentang yang valid',
+        });
+      }
+    }
+
     const result = await eventModel.getAllEvents(req.query);
 
     if (!result.events.length) {
-      return res.status(400).json({
+      return res.status(404).json({
         message: 'Tidak ada event yang ditemukan',
       });
     }
 
+    let message = 'Daftar event berhasil diambil';
+
+    // Ubah pesan jika menggunakan filter lokasi
+    if (latitude && longitude) {
+      const { maxDistance = 50 } = req.query;
+      message = `Ditemukan ${result.events.length} event dalam radius ${maxDistance} km dari lokasi Anda`;
+    }
+
     res.status(200).json({
-      message: 'Daftar event berhasil diambil',
+      message,
       data: result.events,
       pagination: result.pagination,
+      ...(result.locationFilter && { locationFilter: result.locationFilter }),
     });
   } catch (error) {
     next(error);

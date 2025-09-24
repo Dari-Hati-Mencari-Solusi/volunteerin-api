@@ -15,6 +15,11 @@ export const getAllEvents = async (query = {}) => {
     start,
     end,
     publish,
+    latitude,
+    longitude,
+    maxDistance = 50,
+    sortBy = 'newest',
+    isPaid,
   } = query;
 
   const skip = (page - 1) * limit;
@@ -72,9 +77,45 @@ export const getAllEvents = async (query = {}) => {
     };
   }
 
-  const total = await prisma.event.count({
-    where: whereClause,
-  });
+  // Filter berdasarkan event berbayar/gratis
+  if (isPaid !== undefined) {
+    whereClause = {
+      ...whereClause,
+      isPaid: isPaid === '1' || isPaid === 'true',
+    };
+  }
+
+  // Jika ada parameter lokasi, filter event yang memiliki koordinat
+  if (latitude && longitude) {
+    whereClause = {
+      ...whereClause,
+      latitude: { not: null },
+      longitude: { not: null },
+    };
+  }
+
+  let orderBy = {};
+
+  // Set ordering berdasarkan sortBy parameter
+  switch (sortBy) {
+    case 'newest':
+      orderBy = { createdAt: 'desc' };
+      break;
+    case 'oldest':
+      orderBy = { createdAt: 'asc' };
+      break;
+    case 'startDate':
+      orderBy = { startAt: 'asc' };
+      break;
+    case 'endDate':
+      orderBy = { endAt: 'asc' };
+      break;
+    case 'alphabetical':
+      orderBy = { title: 'asc' };
+      break;
+    default:
+      orderBy = { createdAt: 'desc' };
+  }
 
   const events = await prisma.event.findMany({
     where: whereClause,
@@ -102,21 +143,59 @@ export const getAllEvents = async (query = {}) => {
         },
       },
     },
-    skip,
-    take: parseInt(limit),
-    orderBy: {
-      createdAt: 'desc',
-    },
+    orderBy,
   });
 
+  let processedEvents = events;
+
+  // Jika ada parameter lokasi, hitung jarak dan filter berdasarkan radius
+  if (latitude && longitude) {
+    const userLatitude = parseFloat(latitude);
+    const userLongitude = parseFloat(longitude);
+
+    processedEvents = events
+      .map((event) => {
+        const distance = calculateDistance(
+          userLatitude,
+          userLongitude,
+          parseFloat(event.latitude),
+          parseFloat(event.longitude),
+        );
+
+        return {
+          ...event,
+          distance: Math.round(distance * 100) / 100,
+        };
+      })
+      .filter((event) => event.distance <= parseFloat(maxDistance))
+      .sort((a, b) => {
+        if (sortBy === 'distance') {
+          return a.distance - b.distance;
+        }
+        return 0;
+      });
+  }
+
+  // Apply pagination setelah filter dan sorting
+  const total = processedEvents.length;
+  const paginatedEvents = processedEvents.slice(skip, skip + parseInt(limit));
+
   return {
-    events,
+    events: paginatedEvents,
     pagination: {
       total,
       page: parseInt(page),
       limit: parseInt(limit),
       totalPages: Math.ceil(total / limit),
     },
+    ...(latitude &&
+      longitude && {
+        locationFilter: {
+          latitude: parseFloat(latitude),
+          longitude: parseFloat(longitude),
+          maxDistance: parseFloat(maxDistance),
+        },
+      }),
   };
 };
 
@@ -227,57 +306,25 @@ export const getEventById = async (id) => {
 };
 
 export const createEvent = async (data) => {
-  try {
-    const { categoryIds, benefitIds, ...eventData } = data;
+  const { categoryIds, benefitIds, ...eventData } = data;
 
-    const event = await prisma.event.create({
-      data: {
-        ...eventData,
-        maxApplicant: eventData.maxApplicant
-          ? Number(eventData.maxApplicant)
-          : null,
-        acceptedQuota: eventData.acceptedQuota
-          ? Number(eventData.acceptedQuota)
-          : null,
-        isPaid:
-          typeof eventData.isPaid === 'string'
-            ? eventData.isPaid === 'true'
-            : !!eventData.isPaid,
-        price: eventData.price ? Number(eventData.price) : 0,
-        latitude: eventData.latitude ? Number(eventData.latitude) : null,
-        longitude: eventData.longitude ? Number(eventData.longitude) : null,
-        isRelease:
-          typeof eventData.isRelease === 'string'
-            ? eventData.isRelease === 'true'
-            : !!eventData.isRelease,
-        categories:
-          categoryIds && categoryIds.length > 0
-            ? {
-                connect: categoryIds.map((id) => ({ id })),
-              }
-            : undefined,
-        benefits:
-          benefitIds && benefitIds.length > 0
-            ? {
-                connect: benefitIds.map((id) => ({ id })),
-              }
-            : undefined,
+  const event = await prisma.event.create({
+    data: {
+      ...eventData,
+      categories: {
+        connect: categoryIds.map((id) => ({ id })),
       },
-      include: {
-        categories: true,
-        benefits: true,
+      benefits: {
+        connect: benefitIds.map((id) => ({ id })),
       },
-    });
+    },
+    include: {
+      categories: true,
+      benefits: true,
+    },
+  });
 
-    return {
-      ...event,
-    };
-  } catch (error) {
-    if (error.code === 'P2002') {
-      throw new HttpError('Event dengan judul tersebut sudah ada', 400);
-    }
-    throw error;
-  }
+  return event;
 };
 
 export const updateEventById = async (id, data) => {
@@ -374,4 +421,26 @@ export const deleteEvent = async (id) => {
     }
     throw error;
   }
+};
+
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371;
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+
+  return distance;
+};
+
+const toRadians = (degrees) => {
+  return degrees * (Math.PI / 180);
 };
