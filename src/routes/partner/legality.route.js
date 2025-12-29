@@ -1,20 +1,21 @@
-import { Router } from "express";
+import { Router } from 'express';
 import * as authMiddleware from '../../middleware/auth.js';
 import * as accessMiddleware from '../../middleware/access.js';
-import * as uploadMiddleware from "../../middleware/upload.js";
-import * as partnerProfileMiddleware from "../../middleware/partnerProfile.js";
-import * as legalityValidation from "../../middleware/validations/legality.js";
-import * as legalityController from "../../controllers/partner/legality.controller.js";
+import * as uploadMiddleware from '../../middleware/upload.js';
+import * as partnerProfileMiddleware from '../../middleware/partnerProfile.js';
+import * as legalityValidation from '../../middleware/validations/legality.js';
+import * as legalityController from '../../controllers/partner/legality.controller.js';
+import { Roles } from '../../constants/roles.js';
 
 export default (app) => {
   const router = Router();
 
-  app.use("/partners/me", router);
-  
+  app.use('/partners/me', router);
+
   router.post(
     '/legality',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
+    accessMiddleware.authorize([Roles.PARTNER]),
     uploadMiddleware.uploadSingle(
       'document',
       '1MB',
@@ -23,13 +24,13 @@ export default (app) => {
     ),
     partnerProfileMiddleware.ensurePartnerProfileExists,
     legalityValidation.validateLegalityCreate,
-    legalityController.createLegality
+    legalityController.createLegality,
   );
 
   router.get(
     '/legality',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
-    legalityController.getLegality
+    accessMiddleware.authorize([Roles.PARTNER]),
+    legalityController.getLegality,
   );
-}
+};

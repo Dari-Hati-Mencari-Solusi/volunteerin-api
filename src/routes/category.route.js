@@ -3,6 +3,7 @@ import * as authMiddleware from '../middleware/auth.js';
 import * as categoryController from '../controllers/category.controller.js';
 import * as accessMiddleware from '../middleware/access.js';
 import * as categoryValidation from '../middleware/validations/category.js';
+import { Roles } from '../constants/roles.js';
 
 export default (app) => {
   const router = Router();
@@ -13,7 +14,7 @@ export default (app) => {
   router.post(
     '/',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isAdmin,
+    accessMiddleware.authorize([Roles.ADMIN]),
     categoryValidation.validateCategoryCreate,
     categoryController.createCategory,
   );
@@ -21,7 +22,7 @@ export default (app) => {
   router.put(
     '/:id',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isAdmin,
+    accessMiddleware.authorize([Roles.ADMIN]),
     categoryValidation.validateCategoryUpdate,
     categoryController.updateCategory,
   );
@@ -29,7 +30,7 @@ export default (app) => {
   router.delete(
     '/:id',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isAdmin,
+    accessMiddleware.authorize([Roles.ADMIN]),
     categoryController.deleteCategory,
   );
 

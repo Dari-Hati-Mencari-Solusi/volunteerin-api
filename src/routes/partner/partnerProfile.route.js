@@ -6,6 +6,7 @@ import * as imageMiddleware from '../../middleware/image.js';
 import * as partnerProfileController from '../../controllers/partner/partnerProfile.controller.js';
 import * as partnerProfileValidation from '../../middleware/validations/partnerProfile.js';
 import * as partnerProfileMiddleware from '../../middleware/partnerProfile.js';
+import { Roles } from '../../constants/roles.js';
 
 export default (app) => {
   const router = Router();
@@ -15,7 +16,7 @@ export default (app) => {
   router.post(
     '/profile',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
+    accessMiddleware.authorize([Roles.PARTNER]),
     uploadMiddleware.uploadSingle(
       'logo',
       '200KB',
@@ -31,14 +32,14 @@ export default (app) => {
   router.get(
     '/profile',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
-    partnerProfileController.getPartnerProfile
+    accessMiddleware.authorize([Roles.PARTNER]),
+    partnerProfileController.getPartnerProfile,
   );
 
   router.put(
     '/profile',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
+    accessMiddleware.authorize([Roles.PARTNER]),
     uploadMiddleware.uploadSingle(
       'logo',
       '200KB',
@@ -48,6 +49,6 @@ export default (app) => {
     partnerProfileMiddleware.ensurePartnerProfileExists,
     imageMiddleware.maxDimensionOfFile(500, 500),
     partnerProfileValidation.validatePartnerProfileUpdate,
-    partnerProfileController.updatePartnerProfile
+    partnerProfileController.updatePartnerProfile,
   );
 };
