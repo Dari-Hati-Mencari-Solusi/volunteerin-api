@@ -7,6 +7,7 @@ import * as eventController from '../../controllers/event.controller.js';
 import * as eventValidation from '../../middleware/validations/event.js';
 import * as partnerProfileMiddleware from '../../middleware/partnerProfile.js';
 import * as eventMiddleware from '../../middleware/event.js';
+import { Roles } from '../../constants/roles.js';
 
 export default (app) => {
   const router = Router();
@@ -16,8 +17,7 @@ export default (app) => {
   router.post(
     '/events',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
-    // partnerProfileMiddleware.ensurePartnerProfileExists,
+    accessMiddleware.authorize([Roles.PARTNER]),
     uploadMiddleware.uploadSingle(
       'banner',
       '1MB',
@@ -32,14 +32,14 @@ export default (app) => {
   router.get(
     '/events',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
+    accessMiddleware.authorize([Roles.PARTNER]),
     eventController.getEvents,
   );
 
   router.get(
     '/events/:id',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
+    accessMiddleware.authorize([Roles.PARTNER]),
     eventMiddleware.ensureEventOwner,
     eventController.getEvent,
   );
@@ -47,7 +47,7 @@ export default (app) => {
   router.patch(
     '/events/:id',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
+    accessMiddleware.authorize([Roles.PARTNER]),
     partnerProfileMiddleware.ensurePartnerProfileExists,
     eventMiddleware.ensureEventOwner,
     uploadMiddleware.uploadSingle(
@@ -64,7 +64,7 @@ export default (app) => {
   router.delete(
     '/events/:id',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
+    accessMiddleware.authorize([Roles.PARTNER]),
     eventMiddleware.ensureEventOwner,
     eventController.deleteEvent,
   );

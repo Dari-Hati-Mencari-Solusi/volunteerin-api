@@ -7,6 +7,7 @@ import * as formController from '../../controllers/partner/form.controller.js';
 import * as formValidation from '../../middleware/validations/form.js';
 import * as formMiddleware from '../../middleware/form.js';
 import * as partnerStatusMiddleware from '../../middleware/partnerStatus.js';
+import { Roles } from '../../constants/roles.js';
 
 export default (app) => {
   const router = Router();
@@ -17,14 +18,14 @@ export default (app) => {
   router.get(
     '/',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
+    accessMiddleware.authorize([Roles.PARTNER]),
     formController.getMyForms,
   );
 
   router.post(
     '/',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
+    accessMiddleware.authorize([Roles.PARTNER]),
     upload.none(),
     formValidation.validateFormCreate,
     partnerStatusMiddleware.isProfileAccepted,
@@ -34,7 +35,7 @@ export default (app) => {
   router.patch(
     '/:id',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
+    accessMiddleware.authorize([Roles.PARTNER]),
     formValidation.validateFormUpdate,
     partnerStatusMiddleware.isProfileAccepted,
     formMiddleware.ensureFormOwner,

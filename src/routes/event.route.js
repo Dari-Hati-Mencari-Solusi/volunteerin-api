@@ -3,6 +3,8 @@ import * as eventController from '../controllers/event.controller.js';
 import * as authMiddleware from '../middleware/auth.js';
 import * as eventMiddleware from '../middleware/event.js';
 import * as eventValidation from '../middleware/validations/event.js';
+import * as accessMiddleware from '../middleware/access.js';
+import { Roles } from '../constants/roles.js';
 
 export default (app) => {
   const router = Router();
@@ -14,6 +16,7 @@ export default (app) => {
   router.get(
     '/histories',
     authMiddleware.isAuthenticate,
+    accessMiddleware.authorize([Roles.VOLUNTEER]),
     eventController.getUserEventHistory,
   );
 
@@ -26,6 +29,7 @@ export default (app) => {
   router.get(
     '/:id/register',
     authMiddleware.isAuthenticate,
+    accessMiddleware.authorize([Roles.VOLUNTEER]),
     eventMiddleware.ensureEventIsReleased,
     eventController.showRegistrationForm,
   );
@@ -33,6 +37,7 @@ export default (app) => {
   router.post(
     '/:id/register',
     authMiddleware.isAuthenticate,
+    accessMiddleware.authorize([Roles.VOLUNTEER]),
     eventMiddleware.ensureEventIsReleased,
     eventValidation.validateSubmitRegistration,
     eventController.submitRegistration,

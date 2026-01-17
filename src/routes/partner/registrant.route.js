@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import * as authMiddleware from '../../middleware/auth.js';
 import * as accessMiddleware from '../../middleware/access.js';
-import * as registrantController from "../../controllers/partner/registrant.controller.js";
-import * as registrantValidation from "../../middleware/validations/registrant.js";
+import * as registrantController from '../../controllers/partner/registrant.controller.js';
+import * as registrantValidation from '../../middleware/validations/registrant.js';
+import { Roles } from '../../constants/roles.js';
 
 export default (app) => {
   const router = Router();
@@ -10,24 +11,24 @@ export default (app) => {
   app.use('/partners/me', router);
 
   router.get(
-    "/events/:eventId/registrants",
+    '/events/:eventId/registrants',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
-    registrantController.showRegistrantsList
+    accessMiddleware.authorize([Roles.PARTNER]),
+    registrantController.showRegistrantsList,
   );
 
   router.get(
-    "/events/:eventId/registrants/:registrantId",
+    '/events/:eventId/registrants/:registrantId',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
-    registrantController.showDetailRegistrant
+    accessMiddleware.authorize([Roles.PARTNER]),
+    registrantController.showDetailRegistrant,
   );
 
   router.post(
-    "/events/:eventId/registrants/:registrantId",
+    '/events/:eventId/registrants/:registrantId',
     authMiddleware.isAuthenticate,
-    accessMiddleware.isPartner,
+    accessMiddleware.authorize([Roles.PARTNER]),
     registrantValidation.validateReviewRegistrant,
-    registrantController.reviewRegistrant
+    registrantController.reviewRegistrant,
   );
-}
+};

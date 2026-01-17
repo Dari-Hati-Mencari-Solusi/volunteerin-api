@@ -23,7 +23,7 @@ export const register = async (req, res, next) => {
       createdAt: new Date(),
     });
 
-    const payload = { id: user.id };
+    const payload = { id: user.id, role: user.role };
     const token = generateToken(payload, '30m');
 
     const verifyUrl = `${process.env.FE_BASE_URL}/verify-email?t=${token}`;
@@ -60,10 +60,12 @@ export const login = async (req, res, next) => {
     );
 
     if (!isMatch) {
-      return next(new HttpError('Maaf, akun tidak ditemukan.', 404));
+      return next(
+        new HttpError('Email atau password yang Anda masukkan salah', 401),
+      );
     }
 
-    const payload = { id: user.id };
+    const payload = { id: user.id, role: user.role };
     const token = generateToken(payload, '1d');
 
     await userModel.logUserLogin(user.id);
